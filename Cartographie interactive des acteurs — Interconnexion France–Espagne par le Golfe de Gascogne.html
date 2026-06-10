@@ -360,7 +360,7 @@ const a=l.sourceNode,b=l.targetNode;
 let dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1;
 const touchesCenter=a===center||b===center;
 const target=touchesCenter ? 82+a.size+b.size*.25 : 58+a.size+b.size;
-const k=(d-target)*(touchesCenter?.010:.007)*alpha;
+const k=(d-target)*(touchesCenter ? 0.010 : 0.007)*alpha;
 dx/=d;dy/=d;
 if(a!==center&&!a.fixed){a.vx+=dx*k;a.vy+=dy*k}
 if(b!==center&&!b.fixed){b.vx-=dx*k;b.vy-=dy*k}
