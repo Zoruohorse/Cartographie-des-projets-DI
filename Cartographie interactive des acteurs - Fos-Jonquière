@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Cartographie interactive — Ligne THT Fos-Jonquières</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root {
+  --bg:#f8fafc; --panel:#ffffff; --text:#0f172a; --muted:#64748b; --border:#e2e8f0;
+}
+* { box-sizing:border-box; }
+body { margin:0; font-family:Inter, system-ui, -apple-system, Segoe UI, Arial, sans-serif; background:var(--bg); color:var(--text); }
+header { padding:18px 22px 13px; background:linear-gradient(90deg,#0f172a,#334155); color:#fff; }
+header h1 { margin:0; font-size:22px; letter-spacing:-.02em; }
+header p { margin:6px 0 0; color:#cbd5e1; font-size:13px; }
+#wrap { display:grid; grid-template-columns:320px 1fr 360px; min-height:calc(100vh - 76px); }
+aside, #details { background:var(--panel); border-right:1px solid var(--border); padding:16px; overflow:auto; }
+#details { border-right:0; border-left:1px solid var(--border); }
+#chart { position:relative; overflow:hidden; min-height:760px; }
+svg { width:100%; height:100%; display:block; cursor:grab; background:
+  radial-gradient(circle at 30% 25%, rgba(37,99,235,.08), transparent 28%),
+  radial-gradient(circle at 70% 60%, rgba(22,163,74,.08), transparent 32%),
+  #f8fafc; }
+.controls input[type="text"] { width:100%; padding:10px 11px; border:1px solid var(--border); border-radius:10px; font-size:13px; }
+.controls label { display:flex; align-items:center; gap:8px; margin:8px 0; font-size:12px; line-height:1.2; }
+.btnrow { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; }
+button { border:1px solid var(--border); background:#fff; border-radius:10px; padding:8px 10px; cursor:pointer; font-size:12px; }
+button:hover { background:#f1f5f9; }
+.legend-dot { width:11px; height:11px; border-radius:50%; display:inline-block; flex:0 0 auto; }
+.hint { color:var(--muted); font-size:12px; line-height:1.35; padding:10px; border:1px dashed var(--border); border-radius:10px; margin-bottom:14px; background:#f8fafc; }
+.node circle { stroke:#fff; stroke-width:2px; filter: drop-shadow(0 2px 5px rgba(15,23,42,.18)); }
+.node text { font-size:10.5px; font-weight:700; paint-order:stroke; stroke:#fff; stroke-width:4px; stroke-linejoin:round; fill:#0f172a; pointer-events:none; text-anchor:middle; }
+.link { stroke:#94a3b8; stroke-opacity:.35; stroke-width:1.15; }
+.node.dim, .link.dim { opacity:.12; }
+.node.hidden, .link.hidden { display:none; }
+.selected circle { stroke:#0f172a; stroke-width:3.4px; }
+#details h2 { margin:0 0 8px; font-size:20px; }
+.pill { display:inline-block; border-radius:999px; color:white; padding:5px 9px; font-size:12px; font-weight:700; margin-bottom:12px; }
+#details p { font-size:14px; line-height:1.45; }
+.mini { color:var(--muted); font-size:12px; margin-top:18px; }
+.count { color:var(--muted); font-size:12px; margin:10px 0 0; }
+.tooltip { position:absolute; pointer-events:none; background:#0f172a; color:white; padding:7px 9px; border-radius:8px; font-size:12px; opacity:0; transform:translate(-50%,-120%); white-space:nowrap; z-index:5; }
+hr { border:0; border-top:1px solid var(--border); margin:14px 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Cartographie interactive des acteurs — Ligne THT Fos-Jonquières</h1>
+  <p>Nuage relationnel consolidé à partir des 4 vagues : opposants, élus, porteurs industriels, associations, filières, experts, institutions et médias.</p>
+</header>
+
+<div id="wrap">
+  <aside>
+    <div class="hint">
+      Chercher un acteur, filtrer les familles, cliquer sur un nœud pour afficher sa fiche. Les nœuds sont déplaçables ; molette = zoom.
+    </div>
+    <div class="controls">
+      <input id="search" type="text" placeholder="Rechercher un acteur, collectif, média...">
+      <div class="btnrow">
+        <button id="reset">Réinitialiser</button>
+        <button id="center">Recentrer</button>
+        <button id="select-core">Noyau opposition</button>
+      </div>
+      <strong>Filtres</strong>
+      <div id="checks"></div>
+      <div class="count" id="count"></div>
+    </div>
+  </aside>
+
+  <main id="chart">
+    <div class="tooltip" id="tooltip"></div>
+    <svg id="svg"></svg>
+  </main>
+
+  <section id="details">
+    <h2>Ligne THT Fos-Jonquières</h2>
+    <span class="pill" style="background:#111827">Projet central</span>
+    <p>Carte consolidée des acteurs issus des quatre vagues d’analyse. Clique sur un nœud pour afficher son rôle, ses rattachements et ses connexions.</p>
+    <p class="mini">Lecture rapide : plus le nœud est gros, plus l’acteur est structurant ou récurrent dans le corpus consolidé.</p>
+  </section>
+</div>
+
+<script>
+const graph = {"nodes": [{"id": "Ligne THT Fos-Jonquières", "label": "Ligne THT\nFos-Jonquières", "group": "Projet central", "size": 34, "detail": "Projet de ligne aérienne 400 kV entre Jonquières-Saint-Vincent et Fos-sur-Mer, au cœur du conflit entre décarbonation industrielle et protection territoriale."}, {"id": "Jean-Luc Moya", "label": "Jean-Luc\nMoya", "group": "Opposants structurants", "size": 25, "detail": "Porte-parole / membre du Collectif THT 13/30, lié à FNE13 et Agir pour la Crau. Opposant central : critique le passage en force, défend les recours, l'alternative technique et les arguments biodiversité."}, {"id": "Jean-Laurent Lucchesi", "label": "Jean-Laurent\nLucchesi", "group": "Opposants structurants", "size": 25, "detail": "Biologiste, Vigueirat Nature, FNE13, Collectif THT 13/30. Figure centrale côté biodiversité : avifaune, Camargue, couloirs migratoires, alternative enfouie / sous-marine."}, {"id": "Cédric Bernardi", "label": "Cédric\nBernardi", "group": "Opposants agricoles", "size": 21, "detail": "Riziculteur / agriculteur / éleveur, coprésident de l'association de sauvegarde des terres de Camargue et de Crau. Refuse les pylônes sur les terres agricoles."}, {"id": "Guillaume Meiffre", "label": "Guillaume\nMeiffre", "group": "Opposants agricoles", "size": 21, "detail": "Oléiculteur à Mas-Thibert / Saint-Martin-de-Crau, coprésident de l'association de sauvegarde. Évoque une résistance plus dure et une possible ZAD si le projet avance."}, {"id": "Carole Guintoli", "label": "Carole\nGuintoli", "group": "Opposants agricoles", "size": 16, "detail": "Rizicultrice bio en Camargue, membre de l'association de sauvegarde des terres. Associée aux prises de position contre le projet aérien."}, {"id": "Cyril Marès", "label": "Cyril\nMarès", "group": "Opposants agricoles", "size": 19, "detail": "Président de la COPA 30 et de l'AOC Costières de Nîmes. Porte une opposition agricole et viticole ; appelle à une union entre agriculteurs, écologistes et élus."}, {"id": "Sébastien Mabile", "label": "Sébastien\nMabile", "group": "Opposants juridiques", "size": 19, "detail": "Avocat spécialisé en droit de l'environnement / coordinateur juridique du collectif. Structure la bataille juridique et les recours contre le projet aérien."}, {"id": "Luc Perrin", "label": "Luc\nPerrin", "group": "Opposants structurants", "size": 19, "detail": "Président / porte-parole de l'ASTA, acteur de la Terre d'Argence. Défend l'enfouissement et alerte sur les impacts oiseaux et territoires gardois."}, {"id": "Michel Perronet", "label": "Michel\nPerronet", "group": "Opposants experts", "size": 18, "detail": "Ingénieur retraité, ancien du Port autonome de Marseille. Appui technique des opposants ; contribue à l'alternative enfouie / ensouillée et Midi-Provence."}, {"id": "Clément Lajoux", "label": "Clément\nLajoux", "group": "Opposants agricoles", "size": 19, "detail": "Agriculteur, porte-parole de la COPA 13. Mobilisé contre le tracé aérien ; rappelle que les agriculteurs ne refusent pas la décarbonation mais les pylônes."}, {"id": "Romain Collard", "label": "Romain\nCollard", "group": "Opposants agricoles", "size": 17, "detail": "Vigneron beaucairois, Domaine Mourgues du Grès. Refuse que les terres viticoles et agricoles soient sacrifiées alors que des alternatives existent."}, {"id": "Anne Collard", "label": "Anne\nCollard", "group": "Opposants agricoles", "size": 15, "detail": "Vigneronne au Domaine / Château Mourgues du Grès. Alerte sur les impacts terroir, agrotourisme et paysages des Costières de Nîmes."}, {"id": "François Collard", "label": "François\nCollard", "group": "Opposants agricoles", "size": 15, "detail": "Vigneron du Domaine / Château Mourgues du Grès, cité dans l'opposition viticole au projet aérien."}, {"id": "Rémy Benson", "label": "Rémy\nBenson", "group": "Opposants agricoles", "size": 15, "detail": "Éleveur ovins-bovins et producteur de foin, membre de la Coordination rurale. Défend la transmission des exploitations sans pylônes."}, {"id": "Daniel Carlotti", "label": "Daniel\nCarlotti", "group": "Opposants agricoles", "size": 15, "detail": "Riziculteur concerné par l'implantation potentielle de pylônes sur son exploitation. Défend l'existence d'alternatives."}, {"id": "Isabelle Gex", "label": "Isabelle\nGex", "group": "Opposants structurants", "size": 14, "detail": "Membre du Collectif THT 13/30. Répond à l'argument du coût en mettant en avant la volonté politique."}, {"id": "Laura Baudino", "label": "Laura\nBaudino", "group": "Opposants citoyens", "size": 14, "detail": "Directrice de crèche, mobilisée en costume traditionnel d'Arlésienne. Défend une alternative à l'aérien au nom des paysages, emplois, exploitations et biodiversité."}, {"id": "François Cavallo", "label": "François\nCavallo", "group": "Opposants experts", "size": 16, "detail": "Association NACICCA, FNE13. Porte l'argumentaire avifaune avec les comptages d'oiseaux et espèces protégées."}, {"id": "Jean-Claude Cheinet", "label": "Jean-Claude\nCheinet", "group": "Critiques nuancés", "size": 16, "detail": "Ancien élu / acteur local. Ne rejette pas la décarbonation ni le principe de la ligne, mais critique les zones d'ombre, l'État et le manque d'infrastructures."}, {"id": "Daniel Moutet", "label": "Daniel\nMoutet", "group": "Critiques nuancés", "size": 15, "detail": "Président de l'ADPLGF. Critique le débat global Fos-Berre et le risque de dilution des sujets : usines, hydrogène, éolien, THT, transports."}, {"id": "Marie-Hélène Fabre", "label": "Marie-Hélène\nFabre", "group": "Critiques connexes", "size": 14, "detail": "Responsable de l'ACEN. Critique surtout le contournement autoroutier d'Arles et envisage une action juridique sur la concertation."}, {"id": "Cyril Girard", "label": "Cyril\nGirard", "group": "Critiques connexes", "size": 15, "detail": "Changeons d'avenir, élu municipal d'opposition à Arles. Critique les grands projets d'infrastructures, notamment le contournement d'Arles."}, {"id": "Richard Hardouin", "label": "Richard\nHardouin", "group": "Opposants associatifs", "size": 16, "detail": "Président de FNE13. Figure structurante de la fédération environnementale, très impliquée dans le dossier THT."}, {"id": "Stéphane Coppey", "label": "Stéphane\nCoppey", "group": "Opposants juridiques", "size": 15, "detail": "Délégué au juridique et à la mobilité de FNE13. Acteur des actions contentieuses et environnementales."}, {"id": "Patrick de Carolis", "label": "Patrick de\nCarolis", "group": "Élus opposés / critiques", "size": 23, "detail": "Maire d'Arles et président d'ACCM. Opposé au projet aérien tel que présenté ; défend le réexamen des alternatives et soutient le contre-projet."}, {"id": "Séverine Dellanegra", "label": "Séverine\nDellanegra", "group": "Élus opposés / critiques", "size": 22, "detail": "Maire de Saint-Martin-de-Crau, 1ère vice-présidente d'ACCM. Soutien politique clair au camp anti-aérien et à l'association du Collectif THT 13/30 aux débats."}, {"id": "Isabelle Charnoz", "label": "Isabelle\nCharnoz", "group": "Élus opposés / critiques", "size": 18, "detail": "Adjointe à Saint-Martin-de-Crau, engagée dans la protection de l'environnement et associée à la mobilisation anti-THT."}, {"id": "Juan Martinez", "label": "Juan\nMartinez", "group": "Élus opposés / critiques", "size": 20, "detail": "Maire de Bellegarde, président de la CC Beaucaire Terre d'Argence. Très critique : refuse que la Terre d'Argence, la Camargue et la Crau soient balafrées."}, {"id": "Bertrand Mazel", "label": "Bertrand\nMazel", "group": "Élus opposés / critiques", "size": 15, "detail": "Adjoint au maire d'Arles. Relaie la position de Patrick de Carolis et la proposition de Michel Barnier comme tiers facilitateur."}, {"id": "Carole Delga", "label": "Carole\nDelga", "group": "Élus opposés / critiques", "size": 14, "detail": "Présidente de la Région Occitanie, citée comme soutien contre le projet tel que validé par l'État."}, {"id": "Nicolas Koukas", "label": "Nicolas\nKoukas", "group": "Élus prudents / nuancés", "size": 15, "detail": "Conseiller municipal d'opposition PCF à Arles. Position nuancée : favorable à l'enfouissement technique, critique surtout le contournement et la gouvernance municipale."}, {"id": "René Raimondi", "label": "René\nRaimondi", "group": "Élus favorables / institutionnels", "size": 16, "detail": "Maire de Fos-sur-Mer. Plutôt favorable à la réindustrialisation et à la décarbonation de Fos ; critique le débat jugé à charge par les opposants."}, {"id": "Renaud Muselier", "label": "Renaud\nMuselier", "group": "Élus favorables / institutionnels", "size": 18, "detail": "Président de la Région Sud. Défend la feuille de route Fos-Berre et l'ambition d'un pôle européen de décarbonation / réindustrialisation."}, {"id": "Georges-François Leclerc", "label": "Georges-François\nLeclerc", "group": "État / institutions", "size": 18, "detail": "Préfet de région PACA / Bouches-du-Rhône. Cadre le débat public et la décision ; perçu par certains opposants comme trop favorable à la ligne aérienne."}, {"id": "Christophe Mirmand", "label": "Christophe\nMirmand", "group": "État / institutions", "size": 15, "detail": "Ancien préfet de région, à l'origine de la saisine de la CNDP et du débat global Fos-Berre."}, {"id": "Jérôme Bonet", "label": "Jérôme\nBonet", "group": "État / institutions", "size": 14, "detail": "Préfet du Gard, acteur décisionnaire avec la préfecture des Bouches-du-Rhône sur le tracé / l'utilité publique."}, {"id": "Jacques Witkowski", "label": "Jacques\nWitkowski", "group": "État / institutions", "size": 14, "detail": "Nouveau préfet de région PACA / Bouches-du-Rhône cité comme acteur institutionnel du dossier."}, {"id": "RTE", "label": "RTE", "group": "Porteurs / soutiens industriels", "size": 30, "detail": "Porteur technique du projet. Défend la solution aérienne 400 kV pour ses délais, coûts, puissance et disponibilité au service de Fos-Berre."}, {"id": "Gilles Odone", "label": "Gilles\nOdone", "group": "Porteurs / soutiens industriels", "size": 20, "detail": "Délégué / directeur délégué RTE Méditerranée. Défend le renforcement du réseau, les besoins électriques et l'impossibilité de tenir les délais avec l'enfouissement."}, {"id": "Vincent Fletin", "label": "Vincent\nFletin", "group": "Porteurs / soutiens industriels", "size": 17, "detail": "Expert national grands projets chez RTE. Porte l'argumentaire technique de RTE en réunion publique."}, {"id": "Arthur Audouard", "label": "Arthur\nAudouard", "group": "Porteurs / soutiens industriels", "size": 17, "detail": "Responsable national du programme 400 kV chez RTE. Intervient avec Vincent Fletin sur la solution aérienne."}, {"id": "Emmanuel Macron", "label": "Emmanuel\nMacron", "group": "État / institutions", "size": 20, "detail": "Président de la République. Soutient explicitement la ligne, jugée nécessaire pour donner de la visibilité aux industriels et viser une mise en service rapide."}, {"id": "État / gouvernement", "label": "État /\ngouvernement", "group": "État / institutions", "size": 24, "detail": "Porte l'objectif de sécurisation électrique, décarbonation et réindustrialisation de Fos-Berre ; engage l'instruction de la DUP et cadre les arbitrages."}, {"id": "Provence Fabrique des Possibles", "label": "Provence\nFabrique des\nPossibles", "group": "Porteurs / soutiens industriels", "size": 22, "detail": "Collectif industriel soutenant la ligne comme condition de la décarbonation, des investissements et des emplois sur Fos-Berre."}, {"id": "France Chimie Méditerranée", "label": "France Chimie\nMéditerranée", "group": "Porteurs / soutiens industriels", "size": 19, "detail": "Organisation professionnelle industrielle. Soutient la sécurisation rapide de l'alimentation électrique pour préserver investissements et emplois."}, {"id": "Jean-Luc Chauvin", "label": "Jean-Luc\nChauvin", "group": "Porteurs / soutiens industriels", "size": 17, "detail": "Président de la CCI Aix-Marseille Provence. Défend la ligne au nom de la souveraineté, de la sécurité d'approvisionnement et des usages électriques."}, {"id": "Grand Port Maritime de Marseille-Fos", "label": "Grand Port\nMaritime de\nMarseille-Fos", "group": "Porteurs / soutiens industriels", "size": 21, "detail": "Acteur central de la ZIP et de la réindustrialisation ; maître d'ouvrage portuaire, aménageur foncier et pilote de démarches environnementales."}, {"id": "Rémi Costantino", "label": "Rémi\nCostantino", "group": "Porteurs / soutiens industriels", "size": 14, "detail": "Directeur général adjoint du Grand Port Maritime de Marseille-Fos. Défend le desserrement foncier et la recherche de fonciers disponibles."}, {"id": "Régis Passerieux", "label": "Régis\nPasserieux", "group": "État / institutions", "size": 14, "detail": "Commissaire à la transition industrielle écologique et énergétique pour Fos-Berre."}, {"id": "NGE / Jean Bernadet", "label": "NGE /\nJean Bernadet", "group": "Porteurs / soutiens industriels", "size": 17, "detail": "NGE / président Jean Bernadet. Soutient fortement la ligne et estime que l'enfouissement causerait davantage de dégâts."}, {"id": "Club Top 20", "label": "Club\nTop 20", "group": "Porteurs / soutiens industriels", "size": 14, "detail": "Club de grandes entreprises de la Métropole Aix-Marseille Provence, cité comme soutien à la dynamique industrielle."}, {"id": "Marc Petit", "label": "Marc\nPetit", "group": "Experts / débat public", "size": 17, "detail": "Professeur à CentraleSupélec, auteur de la tierce expertise. Juge l'alternative du collectif techniquement pertinente tout en notant les avantages techniques de la solution RTE hors impacts."}, {"id": "Collectif THT 13/30", "label": "Collectif\nTHT 13/30", "group": "Collectifs / associations opposées", "size": 29, "detail": "Coalition centrale d'opposition. Défend l'enfouissement / courant continu / digues du Rhône / liaison sous-marine Midi-Provence, prépare les recours et fédère agriculteurs, élus, associations et riverains."}, {"id": "FNE13", "label": "FNE13", "group": "Collectifs / associations opposées", "size": 25, "detail": "France Nature Environnement Bouches-du-Rhône. Pilier du Collectif THT 13/30, relais juridique et environnemental."}, {"id": "Association sauvegarde terres Camargue-Crau", "label": "Sauvegarde\nterres\nCamargue-Crau", "group": "Collectifs / associations opposées", "size": 22, "detail": "Association agricole et citoyenne fondée / animée par Cédric Bernardi et Guillaume Meiffre. Mot d'ordre : zéro pylône."}, {"id": "ASTA", "label": "ASTA\nTerre d'Argence", "group": "Collectifs / associations opposées", "size": 20, "detail": "Association pour la sauvegarde de la Terre d'Argence. Structuration de l'opposition côté Gard / Beaucaire / Bellegarde."}, {"id": "Vigueirat Nature", "label": "Vigueirat\nNature", "group": "Collectifs / associations opposées", "size": 20, "detail": "Association naturaliste présidée / représentée par Jean-Laurent Lucchesi. Membre du collectif et appui biodiversité."}, {"id": "Agir pour la Crau", "label": "Agir pour\nla Crau", "group": "Collectifs / associations opposées", "size": 18, "detail": "Association locale associée à Jean-Luc Moya et au réseau FNE13."}, {"id": "NACICCA", "label": "NACICCA", "group": "Collectifs / associations opposées", "size": 18, "detail": "Association naturaliste. Réalise des comptages d'oiseaux sur le tracé potentiel et alimente l'argumentaire avifaune."}, {"id": "COPA 13", "label": "COPA 13", "group": "Organisations agricoles", "size": 19, "detail": "Organisation agricole opposée au tracé aérien, représentée notamment par Clément Lajoux."}, {"id": "COPA 30", "label": "COPA 30", "group": "Organisations agricoles", "size": 18, "detail": "Organisation agricole gardoise, représentée par Cyril Marès, mobilisée contre la ligne aérienne."}, {"id": "AOC Costières de Nîmes", "label": "AOC\nCostières\nde Nîmes", "group": "Organisations agricoles", "size": 17, "detail": "Filière viticole mobilisée contre les impacts paysagers, touristiques et agricoles des pylônes."}, {"id": "Domaine Mourgues du Grès", "label": "Domaine\nMourgues\ndu Grès", "group": "Organisations agricoles", "size": 16, "detail": "Domaine viticole beaucairois, incarné par Anne, François et Romain Collard dans l'opposition viticole."}, {"id": "FDSEA / Jeunes Agriculteurs", "label": "FDSEA /\nJeunes\nAgriculteurs", "group": "Organisations agricoles", "size": 17, "detail": "Organisations agricoles fédérées notamment dans la COPA 13 et citées dans la mobilisation contre l'impact foncier."}, {"id": "Coordination rurale", "label": "Coordination\nrurale", "group": "Organisations agricoles", "size": 16, "detail": "Syndicat agricole cité dans la mobilisation, notamment via Rémy Benson."}, {"id": "Chambres d'agriculture", "label": "Chambres\nd'agriculture", "group": "Organisations agricoles", "size": 15, "detail": "Institutions agricoles citées parmi les acteurs mobilisés sur les impacts agricoles."}, {"id": "AOP Foin de Crau", "label": "AOP Foin\nde Crau", "group": "Organisations agricoles", "size": 14, "detail": "Filière / label agricole cité comme potentiellement affecté par le projet."}, {"id": "IGP Riz de Camargue", "label": "IGP Riz\nde Camargue", "group": "Organisations agricoles", "size": 14, "detail": "Filière / label agricole cité dans les impacts potentiels de la ligne."}, {"id": "LPO", "label": "LPO", "group": "Acteurs biodiversité / espaces protégés", "size": 19, "detail": "Ligue pour la protection des oiseaux. Alerte sur les oiseaux migrateurs et habitats naturels ; acteur biodiversité majeur."}, {"id": "WWF France", "label": "WWF\nFrance", "group": "Acteurs biodiversité / espaces protégés", "size": 17, "detail": "ONG environnementale signataire d'appels contre la ligne aérienne."}, {"id": "Tour du Valat", "label": "Tour du\nValat", "group": "Acteurs biodiversité / espaces protégés", "size": 21, "detail": "Institut de recherche sur les zones humides méditerranéennes. Source scientifique majeure sur Camargue, tourbières, oiseaux et zones humides."}, {"id": "CEN PACA", "label": "CEN\nPACA", "group": "Acteurs biodiversité / espaces protégés", "size": 18, "detail": "Conservatoire d'espaces naturels PACA. Alerte sur les espèces protégées, le Ganga cata et l'aigle de Bonelli."}, {"id": "SNPN", "label": "SNPN", "group": "Acteurs biodiversité / espaces protégés", "size": 16, "detail": "Société nationale de protection de la nature, citée dans les contenus naturalistes et les alertes environnementales."}, {"id": "Réseau des Grands Sites de France", "label": "Réseau des\nGrands Sites\nde France", "group": "Acteurs biodiversité / espaces protégés", "size": 17, "detail": "Réseau d'espaces protégés appelant à abandonner la ligne aérienne et à préserver Camargue / Crau / Terre d'Argence."}, {"id": "Ramsar France / MAB France / Réserves naturelles", "label": "Ramsar /\nMAB /\nRéserves", "group": "Acteurs biodiversité / espaces protégés", "size": 17, "detail": "Réseaux d'aires protégées et zones humides, signataires ou interpellés sur les impacts du projet."}, {"id": "OFB", "label": "OFB", "group": "État / institutions", "size": 15, "detail": "Office français de la biodiversité. Intervient dans les constats biodiversité et les programmes scientifiques."}, {"id": "PNR de Camargue", "label": "PNR de\nCamargue", "group": "Acteurs biodiversité / espaces protégés", "size": 17, "detail": "Gestionnaire territorial et naturel, porteur de missions Natura 2000 et de plans de gestion des zones humides."}, {"id": "Nacioun Gardiano", "label": "Nacioun\nGardiano", "group": "Collectifs / associations opposées", "size": 15, "detail": "Organisation culturelle camarguaise présente dans la mobilisation, symbole de l'ancrage culturel territorial."}, {"id": "ADPLGF", "label": "ADPLGF", "group": "Collectifs / associations opposées", "size": 15, "detail": "Association de défense et de protection du littoral du golfe de Fos. Critique la gouvernance du débat global et les effets cumulés."}, {"id": "ACEN", "label": "ACEN", "group": "Collectifs / associations opposées", "size": 15, "detail": "Association Camargue Environnement. Plutôt liée au contournement d'Arles mais dans l'écosystème de contestation territoriale."}, {"id": "Sauvons nos Étangs", "label": "Sauvons\nnos Étangs", "group": "Collectifs / associations opposées", "size": 15, "detail": "Collectif local né de l'opposition à HyVence, porteur d'une demande de Parc naturel régional des étangs du golfe de Fos."}, {"id": "MCTB Golfe de Fos Environnement", "label": "MCTB\nGolfe de Fos\nEnvironnement", "group": "Collectifs / associations opposées", "size": 14, "detail": "Association associée à Sauvons nos Étangs pour la demande de Parc naturel régional des étangs."}, {"id": "GravitHy", "label": "GravitHy", "group": "Projets industriels / énergie", "size": 18, "detail": "Projet d'acier bas-carbone / DRI-HBI à partir d'hydrogène, emblématique des besoins électriques de Fos."}, {"id": "Marcegaglia", "label": "Marcegaglia", "group": "Projets industriels / énergie", "size": 16, "detail": "Industriel sidérurgique, projet de restructuration à Fos et synergies avec GravitHy."}, {"id": "ArcelorMittal Méditerranée", "label": "ArcelorMittal\nMéditerranée", "group": "Projets industriels / énergie", "size": 17, "detail": "Industriel sidérurgique : four à arc électrique et décarbonation, mais aussi dossier contentieux pollution."}, {"id": "Carbon", "label": "Carbon", "group": "Projets industriels / énergie", "size": 15, "detail": "Projet photovoltaïque cité dans les besoins électriques et la réindustrialisation, abandonné dans les documents."}, {"id": "Elyse / Neocarb", "label": "Elyse /\nNeocarb", "group": "Projets industriels / énergie", "size": 16, "detail": "Projet de carburants de synthèse / hydrogène bas-carbone à Fos."}, {"id": "H2V / Hy2Gen", "label": "H2V /\nHy2Gen", "group": "Projets industriels / énergie", "size": 15, "detail": "Producteurs d'hydrogène / carburants renouvelables cités dans la dynamique Fos-Berre."}, {"id": "NaTran", "label": "NaTran", "group": "Projets industriels / énergie", "size": 15, "detail": "Opérateur de réseau hydrogène, porteur du réseau de transport d'hydrogène en région Sud."}, {"id": "Geométhane", "label": "Geométhane", "group": "Projets industriels / énergie", "size": 14, "detail": "Acteur du stockage d'hydrogène à Manosque."}, {"id": "ENGIE", "label": "ENGIE", "group": "Projets industriels / énergie", "size": 14, "detail": "Énergéticien, porteur d'un projet de production d'hydrogène à Villeneuve."}, {"id": "PIICTO / Syrius", "label": "PIICTO /\nSyrius", "group": "Projets industriels / énergie", "size": 16, "detail": "Plateforme et programme de décarbonation industrielle Fos-Berre."}, {"id": "France Hydrogène", "label": "France\nHydrogène", "group": "Projets industriels / énergie", "size": 15, "detail": "Organisation professionnelle hydrogène, demande du soutien public pour structurer la filière."}, {"id": "Newcleo", "label": "Newcleo", "group": "Projets industriels / énergie", "size": 14, "detail": "Acteur nucléaire innovant implanté près de Marcoule ; hors THT direct mais lié au contexte énergétique régional."}, {"id": "CNDP", "label": "CNDP", "group": "Experts / débat public", "size": 22, "detail": "Commission nationale du débat public. Organise le débat global Fos-Berre et cadre la discussion sur industrie, énergie, mobilité, risques, logement et gouvernance."}, {"id": "Audrey Richard-Ferroudji", "label": "Audrey\nRichard-Ferroudji", "group": "Experts / débat public", "size": 16, "detail": "Présidente du débat public Fos-Berre Provence / CPDP. Cadre le débat, rappelle que ce n'est pas un référendum."}, {"id": "Marc Papinutti", "label": "Marc\nPapinutti", "group": "Experts / débat public", "size": 15, "detail": "Président de la CNDP cité dans les documents."}, {"id": "Étienne Ballan", "label": "Étienne\nBallan", "group": "Experts / débat public", "size": 14, "detail": "Animateur de la concertation, cité dans les instances du débat public."}, {"id": "DREAL Occitanie", "label": "DREAL\nOccitanie", "group": "Experts / débat public", "size": 17, "detail": "Service de l'État dont la note environnementale est utilisée par les opposants sur les espèces protégées et le risque juridique."}, {"id": "DREAL PACA / MRAe PACA", "label": "DREAL PACA /\nMRAe PACA", "group": "Experts / débat public", "size": 15, "detail": "Institutions environnementales citées, notamment sur le contournement d'Arles et les procédures."}, {"id": "Commission européenne / Berne / Ramsar", "label": "Commission UE /\nBerne /\nRamsar", "group": "Experts / débat public", "size": 15, "detail": "Instances européennes / internationales évoquées comme leviers de saisine sur les zones humides et espèces protégées."}, {"id": "La Provence", "label": "La\nProvence", "group": "Médias / sources", "size": 15, "detail": "Source locale majeure sur Arles, Camargue, élus, associations et projets industriels."}, {"id": "Objectif Gard", "label": "Objectif\nGard", "group": "Médias / sources", "size": 16, "detail": "Source très présente sur Terre d'Argence, Beaucaire, réunion d'Arles, CNDP et contestation gardoise."}, {"id": "La Marseillaise", "label": "La\nMarseillaise", "group": "Médias / sources", "size": 16, "detail": "Source sur réindustrialisation, débats sociaux, Fos-Berre, biomasse, hydrogène et critiques locales."}, {"id": "France 3 / Franceinfo", "label": "France 3 /\nFranceinfo", "group": "Médias / sources", "size": 15, "detail": "Source nationale-régionale sur biodiversité, cigognes, DREAL, mobilisation agricole et oppositions."}, {"id": "FNE13.fr", "label": "FNE13.fr", "group": "Médias / sources", "size": 15, "detail": "Source militante et associative sur le collectif, la tierce expertise, les recours, la biodiversité et les plaintes."}, {"id": "Marsactu", "label": "Marsactu", "group": "Médias / sources", "size": 14, "detail": "Source d'analyse critique sur RTE, espèces protégées et controverses territoriales."}, {"id": "GoMet", "label": "GoMet", "group": "Médias / sources", "size": 14, "detail": "Source sur débat industriel, Syrius et Parc naturel régional des étangs."}, {"id": "La Tribune Région Sud", "label": "La Tribune\nRégion Sud", "group": "Médias / sources", "size": 14, "detail": "Source sur NGE, GravitHy, Newcleo, filières industrielles et énergétiques."}, {"id": "Tourduvalat.org", "label": "Tour du Valat\n(source)", "group": "Médias / sources", "size": 14, "detail": "Source scientifique sur zones humides, oiseaux d'eau, tourbières et Camargue."}], "links": [{"source": "Ligne THT Fos-Jonquières", "target": "Jean-Luc Moya", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Jean-Laurent Lucchesi", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Cédric Bernardi", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Guillaume Meiffre", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Carole Guintoli", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Cyril Marès", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Sébastien Mabile", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Luc Perrin", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Michel Perronet", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Clément Lajoux", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Romain Collard", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Anne Collard", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "François Collard", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Rémy Benson", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Daniel Carlotti", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Isabelle Gex", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "François Cavallo", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Jean-Claude Cheinet", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Daniel Moutet", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Marie-Hélène Fabre", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Cyril Girard", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Richard Hardouin", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Stéphane Coppey", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Patrick de Carolis", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Séverine Dellanegra", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Isabelle Charnoz", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Juan Martinez", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Bertrand Mazel", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Carole Delga", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Nicolas Koukas", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "René Raimondi", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Renaud Muselier", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Georges-François Leclerc", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Christophe Mirmand", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Jérôme Bonet", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Jacques Witkowski", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "RTE", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Gilles Odone", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Vincent Fletin", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Arthur Audouard", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Emmanuel Macron", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "État / gouvernement", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Provence Fabrique des Possibles", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "France Chimie Méditerranée", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Jean-Luc Chauvin", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Grand Port Maritime de Marseille-Fos", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Rémi Costantino", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Régis Passerieux", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "NGE / Jean Bernadet", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Club Top 20", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Marc Petit", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Collectif THT 13/30", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "FNE13", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Association sauvegarde terres Camargue-Crau", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "ASTA", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Vigueirat Nature", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Agir pour la Crau", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "NACICCA", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "COPA 13", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "COPA 30", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "AOC Costières de Nîmes", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Domaine Mourgues du Grès", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "FDSEA / Jeunes Agriculteurs", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Coordination rurale", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Chambres d'agriculture", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "AOP Foin de Crau", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "IGP Riz de Camargue", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "LPO", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "WWF France", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Tour du Valat", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "CEN PACA", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "SNPN", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Réseau des Grands Sites de France", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Ramsar France / MAB France / Réserves naturelles", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "OFB", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "PNR de Camargue", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Nacioun Gardiano", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "ADPLGF", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "ACEN", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Sauvons nos Étangs", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "MCTB Golfe de Fos Environnement", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "GravitHy", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Marcegaglia", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "ArcelorMittal Méditerranée", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Carbon", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Elyse / Neocarb", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "H2V / Hy2Gen", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "NaTran", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Geométhane", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "ENGIE", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "PIICTO / Syrius", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "France Hydrogène", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Newcleo", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "CNDP", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Audrey Richard-Ferroudji", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Marc Papinutti", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Étienne Ballan", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "DREAL Occitanie", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "DREAL PACA / MRAe PACA", "kind": "position / rattachement au dossier"}, {"source": "Ligne THT Fos-Jonquières", "target": "Commission européenne / Berne / Ramsar", "kind": "position / rattachement au dossier"}, {"source": "Jean-Luc Moya", "target": "Collectif THT 13/30", "kind": "rattachement / proximité"}, {"source": "Jean-Luc Moya", "target": "FNE13", "kind": "rattachement / proximité"}, {"source": "Jean-Luc Moya", "target": "Agir pour la Crau", "kind": "rattachement / proximité"}, {"source": "Jean-Laurent Lucchesi", "target": "Collectif THT 13/30", "kind": "rattachement / proximité"}, {"source": "Jean-Laurent Lucchesi", "target": "Vigueirat Nature", "kind": "rattachement / proximité"}, {"source": "Jean-Laurent Lucchesi", "target": "FNE13", "kind": "rattachement / proximité"}, {"source": "Cédric Bernardi", "target": "Association sauvegarde terres Camargue-Crau", "kind": "rattachement / proximité"}, {"source": "Guillaume Meiffre", "target": "Association sauvegarde terres Camargue-Crau", "kind": "rattachement / proximité"}, {"source": "Carole Guintoli", "target": "Association sauvegarde terres Camargue-Crau", "kind": "rattachement / proximité"}, {"source": "Cyril Marès", "target": "COPA 30", "kind": "rattachement / proximité"}, {"source": "Cyril Marès", "target": "AOC Costières de Nîmes", "kind": "rattachement / proximité"}, {"source": "Sébastien Mabile", "target": "Collectif THT 13/30", "kind": "rattachement / proximité"}, {"source": "Luc Perrin", "target": "ASTA", "kind": "rattachement / proximité"}, {"source": "Michel Perronet", "target": "Collectif THT 13/30", "kind": "rattachement / proximité"}, {"source": "Clément Lajoux", "target": "COPA 13", "kind": "rattachement / proximité"}, {"source": "Clément Lajoux", "target": "FDSEA / Jeunes Agriculteurs", "kind": "rattachement / proximité"}, {"source": "Romain Collard", "target": "Domaine Mourgues du Grès", "kind": "rattachement / proximité"}, {"source": "Anne Collard", "target": "Domaine Mourgues du Grès", "kind": "rattachement / proximité"}, {"source": "François Collard", "target": "Domaine Mourgues du Grès", "kind": "rattachement / proximité"}, {"source": "Rémy Benson", "target": "Coordination rurale", "kind": "rattachement / proximité"}, {"source": "François Cavallo", "target": "NACICCA", "kind": "rattachement / proximité"}, {"source": "François Cavallo", "target": "FNE13", "kind": "rattachement / proximité"}, {"source": "Richard Hardouin", "target": "FNE13", "kind": "rattachement / proximité"}, {"source": "Stéphane Coppey", "target": "FNE13", "kind": "rattachement / proximité"}, {"source": "Patrick de Carolis", "target": "Collectif THT 13/30", "kind": "rattachement / proximité"}, {"source": "Séverine Dellanegra", "target": "Collectif THT 13/30", "kind": "rattachement / proximité"}, {"source": "Isabelle Charnoz", "target": "FNE13", "kind": "rattachement / proximité"}, {"source": "RTE", "target": "Gilles Odone", "kind": "rattachement / proximité"}, {"source": "RTE", "target": "Vincent Fletin", "kind": "rattachement / proximité"}, {"source": "RTE", "target": "Arthur Audouard", "kind": "rattachement / proximité"}, {"source": "Provence Fabrique des Possibles", "target": "France Chimie Méditerranée", "kind": "rattachement / proximité"}, {"source": "Grand Port Maritime de Marseille-Fos", "target": "Rémi Costantino", "kind": "rattachement / proximité"}, {"source": "GravitHy", "target": "Marcegaglia", "kind": "rattachement / proximité"}, {"source": "GravitHy", "target": "ENGIE", "kind": "rattachement / proximité"}, {"source": "Elyse / Neocarb", "target": "France Hydrogène", "kind": "rattachement / proximité"}, {"source": "H2V / Hy2Gen", "target": "France Hydrogène", "kind": "rattachement / proximité"}, {"source": "PIICTO / Syrius", "target": "Grand Port Maritime de Marseille-Fos", "kind": "rattachement / proximité"}, {"source": "CNDP", "target": "Audrey Richard-Ferroudji", "kind": "rattachement / proximité"}, {"source": "CNDP", "target": "Marc Papinutti", "kind": "rattachement / proximité"}, {"source": "CNDP", "target": "Étienne Ballan", "kind": "rattachement / proximité"}, {"source": "Collectif THT 13/30", "target": "FNE13", "kind": "coalition / appui"}, {"source": "Collectif THT 13/30", "target": "Vigueirat Nature", "kind": "coalition / appui"}, {"source": "Collectif THT 13/30", "target": "Agir pour la Crau", "kind": "coalition / appui"}, {"source": "Collectif THT 13/30", "target": "Association sauvegarde terres Camargue-Crau", "kind": "coalition / appui"}, {"source": "Collectif THT 13/30", "target": "ASTA", "kind": "coalition / appui"}, {"source": "Collectif THT 13/30", "target": "NACICCA", "kind": "coalition / appui"}, {"source": "Collectif THT 13/30", "target": "COPA 13", "kind": "coalition / appui"}, {"source": "Collectif THT 13/30", "target": "COPA 30", "kind": "coalition / appui"}, {"source": "Collectif THT 13/30", "target": "LPO", "kind": "coalition / appui"}, {"source": "Collectif THT 13/30", "target": "CEN PACA", "kind": "coalition / appui"}, {"source": "Collectif THT 13/30", "target": "Tour du Valat", "kind": "coalition / appui"}, {"source": "Collectif THT 13/30", "target": "Nacioun Gardiano", "kind": "coalition / appui"}, {"source": "Collectif THT 13/30", "target": "ADPLGF", "kind": "coalition / appui"}, {"source": "Collectif THT 13/30", "target": "ACEN", "kind": "coalition / appui"}, {"source": "COPA 13", "target": "AOC Costières de Nîmes", "kind": "écosystème agricole"}, {"source": "COPA 30", "target": "AOC Costières de Nîmes", "kind": "écosystème agricole"}, {"source": "COPA 13", "target": "Domaine Mourgues du Grès", "kind": "écosystème agricole"}, {"source": "COPA 30", "target": "Domaine Mourgues du Grès", "kind": "écosystème agricole"}, {"source": "COPA 13", "target": "FDSEA / Jeunes Agriculteurs", "kind": "écosystème agricole"}, {"source": "COPA 30", "target": "FDSEA / Jeunes Agriculteurs", "kind": "écosystème agricole"}, {"source": "COPA 13", "target": "Coordination rurale", "kind": "écosystème agricole"}, {"source": "COPA 30", "target": "Coordination rurale", "kind": "écosystème agricole"}, {"source": "COPA 13", "target": "Chambres d'agriculture", "kind": "écosystème agricole"}, {"source": "COPA 30", "target": "Chambres d'agriculture", "kind": "écosystème agricole"}, {"source": "COPA 13", "target": "AOP Foin de Crau", "kind": "écosystème agricole"}, {"source": "COPA 30", "target": "AOP Foin de Crau", "kind": "écosystème agricole"}, {"source": "COPA 13", "target": "IGP Riz de Camargue", "kind": "écosystème agricole"}, {"source": "COPA 30", "target": "IGP Riz de Camargue", "kind": "écosystème agricole"}, {"source": "Tour du Valat", "target": "WWF France", "kind": "écosystème biodiversité"}, {"source": "LPO", "target": "WWF France", "kind": "écosystème biodiversité"}, {"source": "Tour du Valat", "target": "Réseau des Grands Sites de France", "kind": "écosystème biodiversité"}, {"source": "LPO", "target": "Réseau des Grands Sites de France", "kind": "écosystème biodiversité"}, {"source": "Tour du Valat", "target": "Ramsar France / MAB France / Réserves naturelles", "kind": "écosystème biodiversité"}, {"source": "LPO", "target": "Ramsar France / MAB France / Réserves naturelles", "kind": "écosystème biodiversité"}, {"source": "Tour du Valat", "target": "SNPN", "kind": "écosystème biodiversité"}, {"source": "LPO", "target": "SNPN", "kind": "écosystème biodiversité"}, {"source": "Tour du Valat", "target": "OFB", "kind": "écosystème biodiversité"}, {"source": "LPO", "target": "OFB", "kind": "écosystème biodiversité"}, {"source": "Tour du Valat", "target": "PNR de Camargue", "kind": "écosystème biodiversité"}, {"source": "LPO", "target": "PNR de Camargue", "kind": "écosystème biodiversité"}, {"source": "RTE", "target": "Provence Fabrique des Possibles", "kind": "besoins industriels / raccordement"}, {"source": "RTE", "target": "France Chimie Méditerranée", "kind": "besoins industriels / raccordement"}, {"source": "RTE", "target": "Grand Port Maritime de Marseille-Fos", "kind": "besoins industriels / raccordement"}, {"source": "RTE", "target": "GravitHy", "kind": "besoins industriels / raccordement"}, {"source": "RTE", "target": "Marcegaglia", "kind": "besoins industriels / raccordement"}, {"source": "RTE", "target": "ArcelorMittal Méditerranée", "kind": "besoins industriels / raccordement"}, {"source": "RTE", "target": "Carbon", "kind": "besoins industriels / raccordement"}, {"source": "RTE", "target": "Elyse / Neocarb", "kind": "besoins industriels / raccordement"}, {"source": "RTE", "target": "NaTran", "kind": "besoins industriels / raccordement"}, {"source": "RTE", "target": "Geométhane", "kind": "besoins industriels / raccordement"}, {"source": "RTE", "target": "ENGIE", "kind": "besoins industriels / raccordement"}, {"source": "RTE", "target": "PIICTO / Syrius", "kind": "besoins industriels / raccordement"}, {"source": "RTE", "target": "NGE / Jean Bernadet", "kind": "besoins industriels / raccordement"}, {"source": "RTE", "target": "Club Top 20", "kind": "besoins industriels / raccordement"}, {"source": "Collectif THT 13/30", "target": "RTE", "kind": "controverse / procédure"}, {"source": "Collectif THT 13/30", "target": "État / gouvernement", "kind": "controverse / procédure"}, {"source": "Collectif THT 13/30", "target": "CNDP", "kind": "controverse / procédure"}, {"source": "Collectif THT 13/30", "target": "DREAL Occitanie", "kind": "controverse / procédure"}, {"source": "Collectif THT 13/30", "target": "DREAL PACA / MRAe PACA", "kind": "controverse / procédure"}, {"source": "Collectif THT 13/30", "target": "Commission européenne / Berne / Ramsar", "kind": "controverse / procédure"}, {"source": "Ligne THT Fos-Jonquières", "target": "La Provence", "kind": "source / couverture"}, {"source": "Ligne THT Fos-Jonquières", "target": "Objectif Gard", "kind": "source / couverture"}, {"source": "Ligne THT Fos-Jonquières", "target": "La Marseillaise", "kind": "source / couverture"}, {"source": "Ligne THT Fos-Jonquières", "target": "France 3 / Franceinfo", "kind": "source / couverture"}, {"source": "Ligne THT Fos-Jonquières", "target": "FNE13.fr", "kind": "source / couverture"}, {"source": "Ligne THT Fos-Jonquières", "target": "Marsactu", "kind": "source / couverture"}, {"source": "Ligne THT Fos-Jonquières", "target": "GoMet", "kind": "source / couverture"}, {"source": "Ligne THT Fos-Jonquières", "target": "La Tribune Région Sud", "kind": "source / couverture"}, {"source": "Ligne THT Fos-Jonquières", "target": "Tourduvalat.org", "kind": "source / couverture"}]};
+const colors = {"Projet central": "#111827", "Opposants structurants": "#b91c1c", "Opposants agricoles": "#c2410c", "Opposants juridiques": "#7c2d12", "Opposants experts": "#a16207", "Opposants citoyens": "#ea580c", "Opposants associatifs": "#991b1b", "Critiques nuancés": "#92400e", "Critiques connexes": "#78716c", "Élus opposés / critiques": "#7c3aed", "Élus prudents / nuancés": "#6d28d9", "Élus favorables / institutionnels": "#2563eb", "État / institutions": "#1d4ed8", "Porteurs / soutiens industriels": "#0369a1", "Projets industriels / énergie": "#0e7490", "Collectifs / associations opposées": "#15803d", "Organisations agricoles": "#65a30d", "Acteurs biodiversité / espaces protégés": "#059669", "Experts / débat public": "#475569", "Médias / sources": "#64748b"};
+const groups = Object.keys(colors);
+
+const svg = document.getElementById('svg');
+const chart = document.getElementById('chart');
+const details = document.getElementById('details');
+const tooltip = document.getElementById('tooltip');
+const checks = document.getElementById('checks');
+const countEl = document.getElementById('count');
+
+let width = Math.max(900, chart.clientWidth);
+let height = Math.max(760, chart.clientHeight);
+svg.setAttribute('viewBox', [0,0,width,height].join(' '));
+
+const ns = "http://www.w3.org/2000/svg";
+const g = document.createElementNS(ns,'g');
+const linkG = document.createElementNS(ns,'g');
+const nodeG = document.createElementNS(ns,'g');
+svg.appendChild(g); g.appendChild(linkG); g.appendChild(nodeG);
+
+const activeGroups = new Set(groups);
+groups.forEach(gr => {
+  const label = document.createElement('label');
+  const dot = document.createElement('span');
+  dot.className = 'legend-dot';
+  dot.style.background = colors[gr] || '#999';
+  const cb = document.createElement('input');
+  cb.type = 'checkbox'; cb.checked = true; cb.value = gr;
+  const txt = document.createElement('span');
+  txt.textContent = gr;
+  label.appendChild(cb); label.appendChild(dot); label.appendChild(txt);
+  checks.appendChild(label);
+});
+
+const nodes = graph.nodes.map(d => Object.assign({}, d));
+const nodeById = new Map(nodes.map(d => [d.id,d]));
+const links = graph.links
+  .filter(d => nodeById.has(d.source) && nodeById.has(d.target))
+  .map(d => Object.assign({}, d, {source: nodeById.get(d.source), target: nodeById.get(d.target)}));
+
+const linkEls = links.map(l => {
+  const line = document.createElementNS(ns,'line');
+  line.classList.add('link');
+  line.dataset.source = l.source.id;
+  line.dataset.target = l.target.id;
+  linkG.appendChild(line);
+  return line;
+});
+
+const nodeEls = nodes.map(n => {
+  const el = document.createElementNS(ns,'g');
+  el.classList.add('node');
+  el.dataset.id = n.id;
+  el.dataset.group = n.group;
+
+  const c = document.createElementNS(ns,'circle');
+  c.setAttribute('r', n.size);
+  c.setAttribute('fill', colors[n.group] || '#999');
+
+  const t = document.createElementNS(ns,'text');
+  t.setAttribute('dy', n.size + 13);
+  String(n.label || n.id).split('\n').forEach((part,i) => {
+    const tsp = document.createElementNS(ns,'tspan');
+    tsp.textContent = part;
+    tsp.setAttribute('x', 0);
+    tsp.setAttribute('dy', i === 0 ? 0 : 12);
+    t.appendChild(tsp);
+  });
+
+  el.appendChild(c); el.appendChild(t); nodeG.appendChild(el);
+  el.addEventListener('click', () => selectNode(n));
+  el.addEventListener('mouseenter', ev => showTip(n, ev));
+  el.addEventListener('mousemove', ev => showTip(n, ev));
+  el.addEventListener('mouseleave', () => tooltip.style.opacity = 0);
+  drag(el,n);
+  return el;
+});
+
+function initialPosition() {
+  const byGroup = {};
+  nodes.forEach(n => (byGroup[n.group] ||= []).push(n));
+  const groupAngles = {
+    "Projet central": 0,
+    "Opposants structurants": 2.9,
+    "Opposants agricoles": 2.15,
+    "Opposants juridiques": 2.65,
+    "Opposants experts": 2.45,
+    "Opposants citoyens": 2.25,
+    "Opposants associatifs": 2.75,
+    "Critiques nuancés": 1.85,
+    "Critiques connexes": 1.65,
+    "Élus opposés / critiques": 3.45,
+    "Élus prudents / nuancés": 3.8,
+    "Élus favorables / institutionnels": 5.65,
+    "État / institutions": 5.35,
+    "Porteurs / soutiens industriels": 5.95,
+    "Projets industriels / énergie": 0.15,
+    "Collectifs / associations opposées": 3.05,
+    "Organisations agricoles": 2.55,
+    "Acteurs biodiversité / espaces protégés": 3.75,
+    "Experts / débat public": 4.7,
+    "Médias / sources": 4.25
+  };
+  const groupRadius = {
+    "Projet central": 0,
+    "Opposants structurants": 235,
+    "Opposants agricoles": 360,
+    "Opposants juridiques": 345,
+    "Opposants experts": 360,
+    "Opposants citoyens": 400,
+    "Opposants associatifs": 370,
+    "Critiques nuancés": 420,
+    "Critiques connexes": 450,
+    "Élus opposés / critiques": 315,
+    "Élus prudents / nuancés": 390,
+    "Élus favorables / institutionnels": 370,
+    "État / institutions": 310,
+    "Porteurs / soutiens industriels": 295,
+    "Projets industriels / énergie": 405,
+    "Collectifs / associations opposées": 455,
+    "Organisations agricoles": 495,
+    "Acteurs biodiversité / espaces protégés": 490,
+    "Experts / débat public": 440,
+    "Médias / sources": 530
+  };
+
+  nodes.forEach(n => {
+    if(n.group === "Projet central") { n.x = width/2; n.y = height/2; return; }
+    const arr = byGroup[n.group] || [n];
+    const idx = arr.indexOf(n);
+    const total = Math.max(1, arr.length);
+    const base = groupAngles[n.group] || 0;
+    const spread = Math.min(1.25, Math.max(0.35, total * 0.045));
+    const angle = base - spread/2 + (idx + 0.5) * (spread / total);
+    const r = groupRadius[n.group] || 380;
+    n.x = width/2 + Math.cos(angle) * r + ((idx % 3)-1)*18;
+    n.y = height/2 + Math.sin(angle) * r + (((idx+1) % 4)-1.5)*14;
+  });
+}
+initialPosition();
+
+function tick() {
+  for(let k=0; k<2; k++) {
+    links.forEach(l => {
+      const dx = l.target.x-l.source.x, dy = l.target.y-l.source.y;
+      const dist = Math.hypot(dx,dy) || 1;
+      let desired = 150;
+      if(l.source.id === "Ligne THT Fos-Jonquières" || l.target.id === "Ligne THT Fos-Jonquières") desired = 230;
+      if(l.kind && l.kind.includes("rattachement")) desired = 105;
+      if(l.kind && l.kind.includes("coalition")) desired = 120;
+      const f = (dist - desired) * 0.010;
+      const fx = dx/dist*f, fy = dy/dist*f;
+      if(!l.source.fixed) { l.source.x += fx; l.source.y += fy; }
+      if(!l.target.fixed) { l.target.x -= fx; l.target.y -= fy; }
+    });
+
+    for(let i=0; i<nodes.length; i++) for(let j=i+1; j<nodes.length; j++) {
+      const a=nodes[i], b=nodes[j];
+      const dx=b.x-a.x, dy=b.y-a.y;
+      const dist=Math.hypot(dx,dy)||1;
+      const min=a.size+b.size+32;
+      if(dist < min) {
+        const f=(min-dist)/dist*0.025;
+        if(!a.fixed) { a.x -= dx*f; a.y -= dy*f; }
+        if(!b.fixed) { b.x += dx*f; b.y += dy*f; }
+      }
+    }
+
+    nodes.forEach(n => {
+      if(n.group !== "Projet central" && !n.fixed) {
+        n.x += (width/2 - n.x) * 0.0012;
+        n.y += (height/2 - n.y) * 0.0012;
+      }
+      n.x = Math.max(35, Math.min(width-35, n.x));
+      n.y = Math.max(35, Math.min(height-35, n.y));
+    });
+  }
+
+  linkEls.forEach((el,i) => {
+    const l=links[i];
+    el.setAttribute('x1',l.source.x); el.setAttribute('y1',l.source.y);
+    el.setAttribute('x2',l.target.x); el.setAttribute('y2',l.target.y);
+  });
+  nodeEls.forEach((el,i) => el.setAttribute('transform', `translate(${nodes[i].x},${nodes[i].y})`));
+  requestAnimationFrame(tick);
+}
+tick();
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+}
+
+function selectNode(n) {
+  nodeEls.forEach(el => el.classList.remove('selected','dim'));
+  linkEls.forEach(el => el.classList.remove('dim'));
+  const neigh = new Set([n.id]);
+  const rels = [];
+  links.forEach(l => {
+    if(l.source.id === n.id) { neigh.add(l.target.id); rels.push(l.target.id + " — " + (l.kind || "relation")); }
+    if(l.target.id === n.id) { neigh.add(l.source.id); rels.push(l.source.id + " — " + (l.kind || "relation")); }
+  });
+  nodeEls.forEach(el => {
+    if(!neigh.has(el.dataset.id)) el.classList.add('dim');
+    if(el.dataset.id === n.id) el.classList.add('selected');
+  });
+  linkEls.forEach((el,i) => {
+    const l=links[i];
+    if(l.source.id !== n.id && l.target.id !== n.id) el.classList.add('dim');
+  });
+  details.innerHTML = `<h2>${escapeHtml(n.id)}</h2>
+    <span class="pill" style="background:${colors[n.group] || '#64748b'}">${escapeHtml(n.group)}</span>
+    <p>${escapeHtml(n.detail || '')}</p>
+    <hr>
+    <p class="mini"><strong>Connexions visibles :</strong><br>${rels.slice(0,24).map(escapeHtml).join('<br>') || 'aucune'}</p>`;
+}
+
+function showTip(n, ev) {
+  tooltip.textContent = n.id + " — " + n.group;
+  tooltip.style.opacity = 1;
+  const rect = chart.getBoundingClientRect();
+  tooltip.style.left = (ev.clientX - rect.left) + 'px';
+  tooltip.style.top = (ev.clientY - rect.top) + 'px';
+}
+
+function applyFilters() {
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  let visible = 0;
+  nodeEls.forEach((el,i) => {
+    const n = nodes[i];
+    const text = [n.id,n.group,n.detail,n.label].join(' ').toLowerCase();
+    const ok = activeGroups.has(n.group) && (!q || text.includes(q));
+    el.classList.toggle('hidden', !ok);
+    if(ok) visible++;
+  });
+  linkEls.forEach((el,i) => {
+    const l=links[i];
+    const sEl=nodeEls[nodes.indexOf(l.source)], tEl=nodeEls[nodes.indexOf(l.target)];
+    el.classList.toggle('hidden', sEl.classList.contains('hidden') || tEl.classList.contains('hidden'));
+  });
+  countEl.textContent = visible + " nœuds affichés sur " + nodes.length;
+}
+
+checks.addEventListener('change', e => {
+  if(e.target.type === 'checkbox') {
+    e.target.checked ? activeGroups.add(e.target.value) : activeGroups.delete(e.target.value);
+    applyFilters();
+  }
+});
+document.getElementById('search').addEventListener('input', applyFilters);
+
+document.getElementById('reset').onclick = () => {
+  document.getElementById('search').value = "";
+  document.querySelectorAll('#checks input').forEach(cb => { cb.checked=true; activeGroups.add(cb.value); });
+  nodeEls.forEach(el => el.classList.remove('selected','dim','hidden'));
+  linkEls.forEach(el => el.classList.remove('dim','hidden'));
+  details.innerHTML = `<h2>Ligne THT Fos-Jonquières</h2><span class="pill" style="background:#111827">Projet central</span><p>Carte consolidée des acteurs issus des quatre vagues d’analyse. Clique sur un nœud pour afficher son rôle, ses rattachements et ses connexions.</p>`;
+  applyFilters();
+};
+
+document.getElementById('select-core').onclick = () => {
+  const keep = new Set(["Projet central","Opposants structurants","Opposants agricoles","Opposants juridiques","Opposants experts","Élus opposés / critiques","Collectifs / associations opposées","Organisations agricoles","Acteurs biodiversité / espaces protégés"]);
+  activeGroups.clear();
+  document.querySelectorAll('#checks input').forEach(cb => {
+    cb.checked = keep.has(cb.value);
+    if(cb.checked) activeGroups.add(cb.value);
+  });
+  applyFilters();
+};
+
+let currentZoom = 1, panX = 0, panY = 0, panning = false, sx = 0, sy = 0;
+function updateTransform() { g.setAttribute('transform', `translate(${panX},${panY}) scale(${currentZoom})`); }
+document.getElementById('center').onclick = () => { currentZoom=1; panX=0; panY=0; updateTransform(); };
+
+function toSvg(ev) {
+  const rect = svg.getBoundingClientRect();
+  return {x:(ev.clientX-rect.left-panX)/currentZoom, y:(ev.clientY-rect.top-panY)/currentZoom};
+}
+
+function drag(el,n) {
+  let down=false, ox=0, oy=0;
+  el.addEventListener('pointerdown', ev => {
+    down=true; n.fixed=true; el.setPointerCapture(ev.pointerId);
+    const pt=toSvg(ev); ox=n.x-pt.x; oy=n.y-pt.y;
+  });
+  el.addEventListener('pointermove', ev => {
+    if(!down) return;
+    const pt=toSvg(ev); n.x=pt.x+ox; n.y=pt.y+oy;
+  });
+  el.addEventListener('pointerup', ev => { down=false; try { el.releasePointerCapture(ev.pointerId); } catch(e) {} });
+}
+
+svg.addEventListener('wheel', ev => {
+  ev.preventDefault();
+  const scale = ev.deltaY < 0 ? 1.08 : 0.92;
+  currentZoom = Math.max(.35, Math.min(2.8, currentZoom*scale));
+  updateTransform();
+}, {passive:false});
+
+svg.addEventListener('pointerdown', ev => {
+  if(ev.target === svg) { panning=true; sx=ev.clientX-panX; sy=ev.clientY-panY; svg.style.cursor='grabbing'; }
+});
+svg.addEventListener('pointermove', ev => {
+  if(panning) { panX=ev.clientX-sx; panY=ev.clientY-sy; updateTransform(); }
+});
+svg.addEventListener('pointerup', () => { panning=false; svg.style.cursor='grab'; });
+svg.addEventListener('pointerleave', () => { panning=false; svg.style.cursor='grab'; });
+
+window.addEventListener('resize', () => {
+  width = Math.max(900, chart.clientWidth);
+  height = Math.max(760, chart.clientHeight);
+  svg.setAttribute('viewBox', [0,0,width,height].join(' '));
+});
+applyFilters();
+</script>
+</body>
+</html>
