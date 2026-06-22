@@ -269,8 +269,6 @@ const graphData = {
     {"source": "L’Info Durable", "target": "Interconnexion France–Espagne par le Golfe de Gascogne", "kind": "source documentaire", "evidence": "Source secondaire."},
     {"source": "La République des Pyrénées", "target": "Interconnexion France–Espagne par le Golfe de Gascogne", "kind": "source documentaire", "evidence": "Analyse des interconnexions européennes."},
     {
-  "links": [
-    {
       "source": "Mr Chambily (RTE)",
       "target": "RTE",
       "kind": "rattachement",
