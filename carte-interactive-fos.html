@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Cartographie interactive — Ligne THT Fos-Jonquières</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root {
+  --bg:#f8fafc; --panel:#ffffff; --text:#0f172a; --muted:#64748b; --border:#e2e8f0;
+}
+* { box-sizing:border-box; }
+body { margin:0; font-family:Inter, system-ui, -apple-system, Segoe UI, Arial, sans-serif; background:var(--bg); color:var(--text); }
+header { padding:18px 22px 13px; background:linear-gradient(90deg,#0f172a,#334155); color:#fff; }
+header h1 { margin:0; font-size:22px; letter-spacing:-.02em; }
+header p { margin:6px 0 0; color:#cbd5e1; font-size:13px; }
+#wrap { display:grid; grid-template-columns:320px 1fr 360px; min-height:calc(100vh - 76px); }
+aside, #details { background:var(--panel); border-right:1px solid var(--border); padding:16px; overflow:auto; }
+#details { border-right:0; border-left:1px solid var(--border); }
+#chart { position:relative; overflow:hidden; min-height:760px; }
+svg { width:100%; height:100%; display:block; cursor:grab; background:
+  radial-gradient(circle at 30% 25%, rgba(37,99,235,.08), transparent 28%),
+  radial-gradient(circle at 70% 60%, rgba(22,163,74,.08), transparent 32%),
+  #f8fafc; }
+.controls input[type="text"] { width:100%; padding:10px 11px; border:1px solid var(--border); border-radius:10px; font-size:13px; }
+.controls label { display:flex; align-items:center; gap:8px; margin:8px 0; font-size:12px; line-height:1.2; }
+.btnrow { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; }
+button { border:1px solid var(--border); background:#fff; border-radius:10px; padding:8px 10px; cursor:pointer; font-size:12px; }
+button:hover { background:#f1f5f9; }
+.legend-dot { width:11px; height:11px; border-radius:50%; display:inline-block; flex:0 0 auto; }
+.hint { color:var(--muted); font-size:12px; line-height:1.35; padding:10px; border:1px dashed var(--border); border-radius:10px; margin-bottom:14px; background:#f8fafc; }
+.node circle { stroke:#fff; stroke-width:2px; filter: drop-shadow(0 2px 5px rgba(15,23,42,.18)); }
+.node text { font-size:10.5px; font-weight:700; paint-order:stroke; stroke:#fff; stroke-width:4px; stroke-linejoin:round; fill:#0f172a; pointer-events:none; text-anchor:middle; }
+.link { stroke:#94a3b8; stroke-opacity:.35; stroke-width:1.15; }
+.node.dim, .link.dim { opacity:.12; }
+.node.hidden, .link.hidden { display:none; }
+.selected circle { stroke:#0f172a; stroke-width:3.4px; }
+#details h2 { margin:0 0 8px; font-size:20px; }
+.pill { display:inline-block; border-radius:999px; color:white; padding:5px 9px; font-size:12px; font-weight:700; margin-bottom:12px; }
+#details p { font-size:14px; line-height:1.45; }
+.mini { color:var(--muted); font-size:12px; margin-top:18px; }
+.count { color:var(--muted); font-size:12px; margin:10px 0 0; }
+.tooltip { position:absolute; pointer-events:none; background:#0f172a; color:white; padding:7px 9px; border-radius:8px; font-size:12px; opacity:0; transform:translate(-50%,-120%); white-space:nowrap; z-index:5; }
+hr { border:0; border-top:1px solid var(--border); margin:14px 0; }
+</style>
+
+<script src="data-fos.js"></script>
+
+</head>
+<body>
+<header>
+  <h1>Cartographie interactive des acteurs — Ligne THT Fos-Jonquières</h1>
+  <p>Nuage relationnel consolidé à partir des 4 vagues : opposants, élus, porteurs industriels, associations, filières, experts, institutions et médias.</p>
+</header>
+
+<div id="wrap">
+  <aside>
+    <div class="hint">
+      Chercher un acteur, filtrer les familles, cliquer sur un nœud pour afficher sa fiche. Les nœuds sont déplaçables ; molette = zoom.
+    </div>
+    <div class="controls">
+      <input id="search" type="text" placeholder="Rechercher un acteur, collectif, média...">
+      <div class="btnrow">
+        <button id="reset">Réinitialiser</button>
+        <button id="center">Recentrer</button>
+        <button id="select-core">Noyau opposition</button>
+      </div>
+      <strong>Filtres</strong>
+      <div id="checks"></div>
+      <div class="count" id="count"></div>
+    </div>
+  </aside>
+
+  <main id="chart">
+    <div class="tooltip" id="tooltip"></div>
+    <svg id="svg"></svg>
+  </main>
+
+  <section id="details">
+    <h2>Ligne THT Fos-Jonquières</h2>
+    <span class="pill" style="background:#111827">Projet central</span>
+    <p>Carte consolidée des acteurs issus des quatre vagues d’analyse. Clique sur un nœud pour afficher son rôle, ses rattachements et ses connexions.</p>
+    <p class="mini">Lecture rapide : plus le nœud est gros, plus l’acteur est structurant ou récurrent dans le corpus consolidé.</p>
+  </section>
+</div>
+
+<script>
+// -----> LA LIGNE DE CONNEXION <-----
+const graph = graphData;
+
+const colors = {"Projet central": "#111827", "Opposants structurants": "#b91c1c", "Opposants agricoles": "#c2410c", "Opposants juridiques": "#7c2d12", "Opposants experts": "#a16207", "Opposants citoyens": "#ea580c", "Opposants associatifs": "#991b1b", "Critiques nuancés": "#92400e", "Critiques connexes": "#78716c", "Élus opposés / critiques": "#7c3aed", "Élus prudents / nuancés": "#6d28d9", "Élus favorables / institutionnels": "#2563eb", "État / institutions": "#1d4ed8", "Porteurs / soutiens industriels": "#0369a1", "Projets industriels / énergie": "#0e7490", "Collectifs / associations opposées": "#15803d", "Organisations agricoles": "#65a30d", "Acteurs biodiversité / espaces protégés": "#059669", "Experts / débat public": "#475569", "Médias / sources": "#64748b"};
+const groups = Object.keys(colors);
+
+const svg = document.getElementById('svg');
+const chart = document.getElementById('chart');
+const details = document.getElementById('details');
+const tooltip = document.getElementById('tooltip');
+const checks = document.getElementById('checks');
+const countEl = document.getElementById('count');
+
+let width = Math.max(900, chart.clientWidth);
+let height = Math.max(760, chart.clientHeight);
+svg.setAttribute('viewBox', [0,0,width,height].join(' '));
+
+const ns = "http://www.w3.org/2000/svg";
+const g = document.createElementNS(ns,'g');
+const linkG = document.createElementNS(ns,'g');
+const nodeG = document.createElementNS(ns,'g');
+svg.appendChild(g); g.appendChild(linkG); g.appendChild(nodeG);
+
+const activeGroups = new Set(groups);
+groups.forEach(gr => {
+  const label = document.createElement('label');
+  const dot = document.createElement('span');
+  dot.className = 'legend-dot';
+  dot.style.background = colors[gr] || '#999';
+  const cb = document.createElement('input');
+  cb.type = 'checkbox'; cb.checked = true; cb.value = gr;
+  const txt = document.createElement('span');
+  txt.textContent = gr;
+  label.appendChild(cb); label.appendChild(dot); label.appendChild(txt);
+  checks.appendChild(label);
+});
+
+const nodes = graph.nodes.map(d => Object.assign({}, d));
+const nodeById = new Map(nodes.map(d => [d.id,d]));
+const links = graph.links
+  .filter(d => nodeById.has(d.source) && nodeById.has(d.target))
+  .map(d => Object.assign({}, d, {source: nodeById.get(d.source), target: nodeById.get(d.target)}));
+
+const linkEls = links.map(l => {
+  const line = document.createElementNS(ns,'line');
+  line.classList.add('link');
+  line.dataset.source = l.source.id;
+  line.dataset.target = l.target.id;
+  linkG.appendChild(line);
+  return line;
+});
+
+const nodeEls = nodes.map(n => {
+  const el = document.createElementNS(ns,'g');
+  el.classList.add('node');
+  el.dataset.id = n.id;
+  el.dataset.group = n.group;
+
+  const c = document.createElementNS(ns,'circle');
+  c.setAttribute('r', n.size);
+  c.setAttribute('fill', colors[n.group] || '#999');
+
+  const t = document.createElementNS(ns,'text');
+  t.setAttribute('dy', n.size + 13);
+  String(n.label || n.id).split('\n').forEach((part,i) => {
+    const tsp = document.createElementNS(ns,'tspan');
+    tsp.textContent = part;
+    tsp.setAttribute('x', 0);
+    tsp.setAttribute('dy', i === 0 ? 0 : 12);
+    t.appendChild(tsp);
+  });
+
+  el.appendChild(c); el.appendChild(t); nodeG.appendChild(el);
+  el.addEventListener('click', () => selectNode(n));
+  el.addEventListener('mouseenter', ev => showTip(n, ev));
+  el.addEventListener('mousemove', ev => showTip(n, ev));
+  el.addEventListener('mouseleave', () => tooltip.style.opacity = 0);
+  drag(el,n);
+  return el;
+});
+
+function initialPosition() {
+  const byGroup = {};
+  nodes.forEach(n => (byGroup[n.group] ||= []).push(n));
+  const groupAngles = {
+    "Projet central": 0,
+    "Opposants structurants": 2.9,
+    "Opposants agricoles": 2.15,
+    "Opposants juridiques": 2.65,
+    "Opposants experts": 2.45,
+    "Opposants citoyens": 2.25,
+    "Opposants associatifs": 2.75,
+    "Critiques nuancés": 1.85,
+    "Critiques connexes": 1.65,
+    "Élus opposés / critiques": 3.45,
+    "Élus prudents / nuancés": 3.8,
+    "Élus favorables / institutionnels": 5.65,
+    "État / institutions": 5.35,
+    "Porteurs / soutiens industriels": 5.95,
+    "Projets industriels / énergie": 0.15,
+    "Collectifs / associations opposées": 3.05,
+    "Organisations agricoles": 2.55,
+    "Acteurs biodiversité / espaces protégés": 3.75,
+    "Experts / débat public": 4.7,
+    "Médias / sources": 4.25
+  };
+  const groupRadius = {
+    "Projet central": 0,
+    "Opposants structurants": 235,
+    "Opposants agricoles": 360,
+    "Opposants juridiques": 345,
+    "Opposants experts": 360,
+    "Opposants citoyens": 400,
+    "Opposants associatifs": 370,
+    "Critiques nuancés": 420,
+    "Critiques connexes": 450,
+    "Élus opposés / critiques": 315,
+    "Élus prudents / nuancés": 390,
+    "Élus favorables / institutionnels": 370,
+    "État / institutions": 310,
+    "Porteurs / soutiens industriels": 295,
+    "Projets industriels / énergie": 405,
+    "Collectifs / associations opposées": 455,
+    "Organisations agricoles": 495,
+    "Acteurs biodiversité / espaces protégés": 490,
+    "Experts / débat public": 440,
+    "Médias / sources": 530
+  };
+
+  nodes.forEach(n => {
+    if(n.group === "Projet central") { n.x = width/2; n.y = height/2; return; }
+    const arr = byGroup[n.group] || [n];
+    const idx = arr.indexOf(n);
+    const total = Math.max(1, arr.length);
+    const base = groupAngles[n.group] || 0;
+    const spread = Math.min(1.25, Math.max(0.35, total * 0.045));
+    const angle = base - spread/2 + (idx + 0.5) * (spread / total);
+    const r = groupRadius[n.group] || 380;
+    n.x = width/2 + Math.cos(angle) * r + ((idx % 3)-1)*18;
+    n.y = height/2 + Math.sin(angle) * r + (((idx+1) % 4)-1.5)*14;
+  });
+}
+initialPosition();
+
+function tick() {
+  for(let k=0; k<2; k++) {
+    links.forEach(l => {
+      const dx = l.target.x-l.source.x, dy = l.target.y-l.source.y;
+      const dist = Math.hypot(dx,dy) || 1;
+      let desired = 150;
+      if(l.source.id === "Ligne THT Fos-Jonquières" || l.target.id === "Ligne THT Fos-Jonquières") desired = 230;
+      if(l.kind && l.kind.includes("rattachement")) desired = 105;
+      if(l.kind && l.kind.includes("coalition")) desired = 120;
+      const f = (dist - desired) * 0.010;
+      const fx = dx/dist*f, fy = dy/dist*f;
+      if(!l.source.fixed) { l.source.x += fx; l.source.y += fy; }
+      if(!l.target.fixed) { l.target.x -= fx; l.target.y -= fy; }
+    });
+
+    for(let i=0; i<nodes.length; i++) for(let j=i+1; j<nodes.length; j++) {
+      const a=nodes[i], b=nodes[j];
+      const dx=b.x-a.x, dy=b.y-a.y;
+      const dist=Math.hypot(dx,dy)||1;
+      const min=a.size+b.size+32;
+      if(dist < min) {
+        const f=(min-dist)/dist*0.025;
+        if(!a.fixed) { a.x -= dx*f; a.y -= dy*f; }
+        if(!b.fixed) { b.x += dx*f; b.y += dy*f; }
+      }
+    }
+
+    nodes.forEach(n => {
+      if(n.group !== "Projet central" && !n.fixed) {
+        n.x += (width/2 - n.x) * 0.0012;
+        n.y += (height/2 - n.y) * 0.0012;
+      }
+      n.x = Math.max(35, Math.min(width-35, n.x));
+      n.y = Math.max(35, Math.min(height-35, n.y));
+    });
+  }
+
+  linkEls.forEach((el,i) => {
+    const l=links[i];
+    el.setAttribute('x1',l.source.x); el.setAttribute('y1',l.source.y);
+    el.setAttribute('x2',l.target.x); el.setAttribute('y2',l.target.y);
+  });
+  nodeEls.forEach((el,i) => el.setAttribute('transform', `translate(${nodes[i].x},${nodes[i].y})`));
+  requestAnimationFrame(tick);
+}
+tick();
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+}
+
+function selectNode(n) {
+  nodeEls.forEach(el => el.classList.remove('selected','dim'));
+  linkEls.forEach(el => el.classList.remove('dim'));
+  const neigh = new Set([n.id]);
+  const rels = [];
+  links.forEach(l => {
+    if(l.source.id === n.id) { neigh.add(l.target.id); rels.push(l.target.id + " — " + (l.kind || "relation")); }
+    if(l.target.id === n.id) { neigh.add(l.source.id); rels.push(l.source.id + " — " + (l.kind || "relation")); }
+  });
+  nodeEls.forEach(el => {
+    if(!neigh.has(el.dataset.id)) el.classList.add('dim');
+    if(el.dataset.id === n.id) el.classList.add('selected');
+  });
+  linkEls.forEach((el,i) => {
+    const l=links[i];
+    if(l.source.id !== n.id && l.target.id !== n.id) el.classList.add('dim');
+  });
+  details.innerHTML = `<h2>${escapeHtml(n.id)}</h2>
+    <span class="pill" style="background:${colors[n.group] || '#64748b'}">${escapeHtml(n.group)}</span>
+    <p>${escapeHtml(n.detail || '')}</p>
+    <hr>
+    <p class="mini"><strong>Connexions visibles :</strong><br>${rels.slice(0,24).map(escapeHtml).join('<br>') || 'aucune'}</p>`;
+}
+
+function showTip(n, ev) {
+  tooltip.textContent = n.id + " — " + n.group;
+  tooltip.style.opacity = 1;
+  const rect = chart.getBoundingClientRect();
+  tooltip.style.left = (ev.clientX - rect.left) + 'px';
+  tooltip.style.top = (ev.clientY - rect.top) + 'px';
+}
+
+function applyFilters() {
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  let visible = 0;
+  nodeEls.forEach((el,i) => {
+    const n = nodes[i];
+    const text = [n.id,n.group,n.detail,n.label].join(' ').toLowerCase();
+    const ok = activeGroups.has(n.group) && (!q || text.includes(q));
+    el.classList.toggle('hidden', !ok);
+    if(ok) visible++;
+  });
+  linkEls.forEach((el,i) => {
+    const l=links[i];
+    const sEl=nodeEls[nodes.indexOf(l.source)], tEl=nodeEls[nodes.indexOf(l.target)];
+    el.classList.toggle('hidden', sEl.classList.contains('hidden') || tEl.classList.contains('hidden'));
+  });
+  countEl.textContent = visible + " nœuds affichés sur " + nodes.length;
+}
+
+checks.addEventListener('change', e => {
+  if(e.target.type === 'checkbox') {
+    e.target.checked ? activeGroups.add(e.target.value) : activeGroups.delete(e.target.value);
+    applyFilters();
+  }
+});
+document.getElementById('search').addEventListener('input', applyFilters);
+
+document.getElementById('reset').onclick = () => {
+  document.getElementById('search').value = "";
+  document.querySelectorAll('#checks input').forEach(cb => { cb.checked=true; activeGroups.add(cb.value); });
+  nodeEls.forEach(el => el.classList.remove('selected','dim','hidden'));
+  linkEls.forEach(el => el.classList.remove('dim','hidden'));
+  details.innerHTML = `<h2>Ligne THT Fos-Jonquières</h2><span class="pill" style="background:#111827">Projet central</span><p>Carte consolidée des acteurs issus des quatre vagues d’analyse. Clique sur un nœud pour afficher son rôle, ses rattachements et ses connexions.</p>`;
+  applyFilters();
+};
+
+document.getElementById('select-core').onclick = () => {
+  const keep = new Set(["Projet central","Opposants structurants","Opposants agricoles","Opposants juridiques","Opposants experts","Élus opposés / critiques","Collectifs / associations opposées","Organisations agricoles","Acteurs biodiversité / espaces protégés"]);
+  activeGroups.clear();
+  document.querySelectorAll('#checks input').forEach(cb => {
+    cb.checked = keep.has(cb.value);
+    if(cb.checked) activeGroups.add(cb.value);
+  });
+  applyFilters();
+};
+
+let currentZoom = 1, panX = 0, panY = 0, panning = false, sx = 0, sy = 0;
+function updateTransform() { g.setAttribute('transform', `translate(${panX},${panY}) scale(${currentZoom})`); }
+document.getElementById('center').onclick = () => { currentZoom=1; panX=0; panY=0; updateTransform(); };
+
+function toSvg(ev) {
+  const rect = svg.getBoundingClientRect();
+  return {x:(ev.clientX-rect.left-panX)/currentZoom, y:(ev.clientY-rect.top-panY)/currentZoom};
+}
+
+function drag(el,n) {
+  let down=false, ox=0, oy=0;
+  el.addEventListener('pointerdown', ev => {
+    down=true; n.fixed=true; el.setPointerCapture(ev.pointerId);
+    const pt=toSvg(ev); ox=n.x-pt.x; oy=n.y-pt.y;
+  });
+  el.addEventListener('pointermove', ev => {
+    if(!down) return;
+    const pt=toSvg(ev); n.x=pt.x+ox; n.y=pt.y+oy;
+  });
+  el.addEventListener('pointerup', ev => { down=false; try { el.releasePointerCapture(ev.pointerId); } catch(e) {} });
+}
+
+svg.addEventListener('wheel', ev => {
+  ev.preventDefault();
+  const scale = ev.deltaY < 0 ? 1.08 : 0.92;
+  currentZoom = Math.max(.35, Math.min(2.8, currentZoom*scale));
+  updateTransform();
+}, {passive:false});
+
+svg.addEventListener('pointerdown', ev => {
+  if(ev.target === svg) { panning=true; sx=ev.clientX-panX; sy=ev.clientY-panY; svg.style.cursor='grabbing'; }
+});
+svg.addEventListener('pointermove', ev => {
+  if(panning) { panX=ev.clientX-sx; panY=ev.clientY-sy; updateTransform(); }
+});
+svg.addEventListener('pointerup', () => { panning=false; svg.style.cursor='grab'; });
+svg.addEventListener('pointerleave', () => { panning=false; svg.style.cursor='grab'; });
+
+window.addEventListener('resize', () => {
+  width = Math.max(900, chart.clientWidth);
+  height = Math.max(760, chart.clientHeight);
+  svg.setAttribute('viewBox', [0,0,width,height].join(' '));
+});
+applyFilters();
+</script>
+</body>
+</html>
