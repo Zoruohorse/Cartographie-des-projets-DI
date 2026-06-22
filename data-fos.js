@@ -106,6 +106,7 @@ const graphData = {
     {"id": "Objectif Gard", "label": "Objectif\nGard", "group": "Médias / sources", "size": 16, "detail": "Source très présente sur Terre d'Argence, Beaucaire, réunion d'Arles, CNDP et contestation gardoise."}, 
     {"id": "La Marseillaise", "label": "La\nMarseillaise", "group": "Médias / sources", "size": 16, "detail": "Source sur réindustrialisation, débats sociaux, Fos-Berre, biomasse, hydrogène et critiques locales."}, 
     {"id": "France 3 / Franceinfo",
+      ]
      {
   "nodes": [
     {"id": "Ligne THT Fos-Jonquières", "label": "Ligne THT\nFos-Jonquières", "group": "Projet central", "size": 34, "detail": "Projet aérien 400kV contesté pour ses impacts territoriaux et environnementaux."},
