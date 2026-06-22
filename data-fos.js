@@ -106,3 +106,22 @@ const graphData = {
     {"id": "Objectif Gard", "label": "Objectif\nGard", "group": "Médias / sources", "size": 16, "detail": "Source très présente sur Terre d'Argence, Beaucaire, réunion d'Arles, CNDP et contestation gardoise."}, 
     {"id": "La Marseillaise", "label": "La\nMarseillaise", "group": "Médias / sources", "size": 16, "detail": "Source sur réindustrialisation, débats sociaux, Fos-Berre, biomasse, hydrogène et critiques locales."}, 
     {"id": "France 3 / Franceinfo",
+     {
+  "nodes": [
+    {"id": "Ligne THT Fos-Jonquières", "label": "Ligne THT\nFos-Jonquières", "group": "Projet central", "size": 34, "detail": "Projet aérien 400kV contesté pour ses impacts territoriaux et environnementaux."},
+    {"id": "RTE", "label": "RTE", "group": "Porteurs / soutiens industriels", "size": 30, "detail": "Porteur du projet, défend la solution aérienne pour des raisons de coût et de délai."},
+    {"id": "Patrick de Carolis", "label": "Patrick de\nCarolis", "group": "Élus opposés / critiques", "size": 25, "detail": "Maire d'Arles, demande la révision des alternatives et une meilleure concertation."},
+    {"id": "Collectif THT 13/30", "label": "Collectif\nTHT 13/30", "group": "Collectifs / associations opposées", "size": 28, "detail": "Coalition d'opposition regroupant associations et citoyens."},
+    {"id": "Renaud Muselier", "label": "Renaud\nMuselier", "group": "Élus favorables / institutionnels", "size": 22, "detail": "Président de Région, prône une solution partagée et s'interroge sur le tracé."},
+    {"id": "Jean-Luc Moya", "label": "Jean-Luc\nMoya", "group": "Opposants structurants", "size": 20, "detail": "Porte-parole du collectif, très investi contre l'aérien."},
+    {"id": "Cédric Bernardi", "label": "Cédric\nBernardi", "group": "Opposants agricoles", "size": 20, "detail": "Riziculteur, membre de l'ASTCC, s'oppose à l'emprise sur ses terres."}
+  ],
+  "links": [
+    {"source": "RTE", "target": "Ligne THT Fos-Jonquières", "kind": "Maître d'ouvrage"},
+    {"source": "Patrick de Carolis", "target": "Ligne THT Fos-Jonquières", "kind": "Opposé"},
+    {"source": "Collectif THT 13/30", "target": "Ligne THT Fos-Jonquières", "kind": "Opposé"},
+    {"source": "Jean-Luc Moya", "target": "Collectif THT 13/30", "kind": "Porte-parole"},
+    {"source": "Cédric Bernardi", "target": "Collectif THT 13/30", "kind": "Membre"},
+    {"source": "Renaud Muselier", "target": "Ligne THT Fos-Jonquières", "kind": "Critique nuancé"}
+  ]
+}
