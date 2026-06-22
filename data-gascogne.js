@@ -50,6 +50,161 @@ const graphData = {
     {"id": "Champs électromagnétiques", "label": "Champs électromagnétiques", "group": "Points de vigilance / griefs", "size": 14, "detail": "Risques sanitaires liés aux champs électromagnétiques.", "position": "Point de vigilance.", "evidence": "Évoqués par certaines associations."},
     {"id": "Sécurité maritime", "label": "Sécurité maritime", "group": "Points de vigilance / griefs", "size": 15, "detail": "Sécurité maritime, notamment concernant certains navires employés sur le chantier.", "position": "Grief structurant.", "evidence": "Point notamment porté par la CGT et des organisations syndicales maritimes."},
     {"id": "Développement énergétique au détriment du vivant", "label": "Développement au détriment du vivant", "group": "Points de vigilance / griefs", "size": 15, "detail": "Critique d’un projet présenté comme symbole d’une logique de développement énergétique au détriment du vivant.", "position": "Grief structurant.", "evidence": "Argument environnemental relayé dans le corpus."}
+    {"id": "Mr Chambily (RTE)", "label": "Mr Chambily", "group": "Acteurs seulement cités", "size": 12, "detail": "Personne désignée comme relevant de RTE dans une publication de Stop THT 40.", "position": "Position sur le projet non établie.", "evidence": "Le post du 14 juin cite « Mr Chambily (RTE) » et l’invite à une table ronde."},
+    {"id": "Mme Pajot (RTE)", "label": "Mme Pajot", "group": "Acteurs seulement cités", "size": 12, "detail": "Personne désignée comme relevant de RTE dans une publication de Stop THT 40.", "position": "Position sur le projet non établie.", "evidence": "Le post du 14 juin cite « Mme Pajot (RTE) » et l’invite à une table ronde."},
+    {"id": "Vert",
+      "label": "Vert",
+      "group": "Médias / sources",
+      "size": 13,
+      "detail": "Média à l’origine d’une enquête de terrain sur le conflit local.",
+      "position": "Source documentaire.",
+      "evidence": "Article du 13 juin 2026 sur le projet, Stop THT 40, RTE et les enjeux environnementaux."
+    },
+    {
+      "id": "Gilles Clavreul",
+      "label": "Gilles Clavreul",
+      "group": "Acteurs seulement cités",
+      "size": 13,
+      "detail": "Désigné dans l’article de Vert comme préfet des Landes.",
+      "position": "Aucune position explicite ; il n’a pas répondu aux questions de Vert.",
+      "evidence": "« Contacté, Gilles Clavreul, le préfet des Landes, n’a pas voulu répondre à nos questions. »"
+    },
+    {
+      "id": "Conseil national de la protection de la nature (CNPN)",
+      "label": "CNPN",
+      "group": "Institutions publiques",
+      "size": 18,
+      "detail": "Instance d’expertise scientifique et technique de l’État.",
+      "position": "Avis défavorable au projet en 2022, au regard des impacts terrestres, des mesures de réduction et de compensation, et des alternatives.",
+      "evidence": "Le rapport cite l’avis défavorable du 22 août 2022."
+    },
+    {
+      "id": "Ministère de la transition énergétique",
+      "label": "Ministère T. énergétique",
+      "group": "Institutions publiques",
+      "size": 15,
+      "detail": "Ministère cité comme ayant déclaré le projet d’utilité publique.",
+      "position": "Rôle administratif rapporté ; position politique non détaillée.",
+      "evidence": "Le projet est décrit comme « déclaré d’utilité publique » par ce ministère."
+    },
+    {
+      "id": "Ministère de la transition écologique",
+      "label": "Ministère T. écologique",
+      "group": "Institutions publiques",
+      "size": 15,
+      "detail": "Ministère cité au sujet des autorisations et de l’avis du CNPN.",
+      "position": "Rôle administratif rapporté ; aucune explication immédiate sur la non-prise en compte de l’avis du CNPN.",
+      "evidence": "RTE rappelle qu’un « avis favorable conforme » a été émis ; le ministère indique ne pas pouvoir répondre dans l’immédiat."
+    },
+    {
+      "id": "Landes Aquitaine Environnement",
+      "label": "Landes Aquitaine Environnement",
+      "group": "Associations environnementales",
+      "size": 18,
+      "detail": "Association citée comme soutien juridique de Stop THT 40.",
+      "position": "Critique ; porte un recours contre les travaux et relaie des inquiétudes sanitaires.",
+      "evidence": "Le rapport indique qu’elle soutient juridiquement Stop THT 40 et est à l’initiative d’un recours devant le Conseil d’État."
+    },
+    {
+      "id": "Leyla Labescat",
+      "label": "Leyla Labescat",
+      "group": "Opposants nommés",
+      "size": 16,
+      "detail": "Secrétaire de l’association Landes Aquitaine Environnement.",
+      "position": "Inquiète des effets potentiels sur la santé humaine et de l’absence d’étude signalée.",
+      "evidence": "« Aucune étude n’a été menée sur le sujet » ; « On ne veut pas être des cobayes. »"
+    },
+    {
+      "id": "Conseil d’État",
+      "label": "Conseil d’État",
+      "group": "Institutions publiques",
+      "size": 15,
+      "detail": "Juridiction saisie d’un recours contre les travaux.",
+      "position": "Aucune position ni décision rapportée.",
+      "evidence": "Le recours initié par Landes Aquitaine Environnement est indiqué comme porté devant le Conseil d’État."
+    },
+    {
+      "id": "François Bayrou",
+      "label": "François Bayrou",
+      "group": "Acteurs seulement cités",
+      "size": 12,
+      "detail": "Désigné dans le rapport comme le destinataire d’une lettre ouverte de 2024.",
+      "position": "Position sur le projet non établie.",
+      "evidence": "La lettre ouverte demandant un moratoire lui a été adressée, selon le rapport."
+    },
+    {
+      "id": "Monique Barbut",
+      "label": "Monique Barbut",
+      "group": "Acteurs seulement cités",
+      "size": 12,
+      "detail": "Désignée dans le rapport comme nouvelle ministre de la transition écologique.",
+      "position": "Position sur le projet non établie ; elle est sollicitée par les militants.",
+      "evidence": "Les militants comptent sur elle pour accéder à leur demande de moratoire."
+    },
+    {
+      "id": "Mairie de Capbreton",
+      "label": "Mairie de Capbreton",
+      "group": "Institutions publiques",
+      "size": 15,
+      "detail": "Institution municipale citée au sujet de l’échouage d’une baleine.",
+      "position": "Indique initialement qu’aucun élément ne permet de relier le décès au chantier.",
+      "evidence": "La mairie explique que rien ne permet « de lier la mort de la baleine au chantier » de RTE."
+    },
+    {
+      "id": "Laboratoire Pélagis",
+      "label": "Pélagis",
+      "group": "Acteurs seulement cités",
+      "size": 16,
+      "detail": "Laboratoire rattaché à l’université de La Rochelle, cité aussi comme observatoire Pélagis et coordinateur du réseau national échouages.",
+      "position": "Expertise scientifique ; aucune attribution causale du décès au chantier.",
+      "evidence": "Les premières observations tendent vers une forte probabilité d’infection ; la cause primaire du décès demeure indéterminée."
+    },
+    {
+      "id": "Comité de suivi environnemental (CSE)",
+      "label": "CSE",
+      "group": "Institutions publiques",
+      "size": 16,
+      "detail": "Instance de suivi des travaux et des engagements environnementaux de RTE.",
+      "position": "Suivi institutionnel ; aucune position autonome sur le projet n’est rapportée.",
+      "evidence": "Cinquième réunion tenue le 5 juin 2026 sous la présidence du préfet des Landes."
+    },
+    {
+      "id": "DREAL",
+      "label": "DREAL",
+      "group": "Institutions publiques",
+      "size": 14,
+      "detail": "Service de l’État cité parmi les autorités supervisant le suivi environnemental.",
+      "position": "Supervision et contrôle environnementaux.",
+      "evidence": "Le rapport cite la DREAL parmi les services de l’État assurant la supervision."
+    },
+    {
+      "id": "DDTM",
+      "label": "DDTM",
+      "group": "Institutions publiques",
+      "size": 14,
+      "detail": "Service de l’État cité parmi les autorités supervisant le suivi environnemental.",
+      "position": "Supervision et contrôle environnementaux.",
+      "evidence": "Le rapport cite la DDTM parmi les services de l’État assurant la supervision."
+    },
+    {
+      "id": "OFB",
+      "label": "OFB",
+      "group": "Institutions publiques",
+      "size": 14,
+      "detail": "Service de l’État cité parmi les autorités supervisant le suivi environnemental.",
+      "position": "Supervision et contrôle environnementaux.",
+      "evidence": "Le rapport cite l’OFB parmi les services de l’État assurant la supervision."
+    },
+    {
+      "id": "Écologue missionné par RTE",
+      "label": "Écologue RTE",
+      "group": "Acteurs seulement cités",
+      "size": 12,
+      "detail": "Écologue non nommé, missionné par RTE pour la surveillance environnementale.",
+      "position": "Rôle de suivi ; aucune position personnelle rapportée.",
+      "evidence": "Le rapport mentionne la surveillance de « l’écologue missionné par RTE »."
+    },
+    {"id": "Chercheur spécialiste du suivi morphologique du canyon (anonyme)", "label": "Chercheur anonyme", "group": "Acteurs seulement cités", "size": 12, "detail": "Chercheur non identifié, cité au sujet du gouf de Capbreton.", "position": "Apporte une expertise technique sur l’impossibilité de faire passer les câbles dans le canyon ; aucune position globale sur le projet n’est rapportée.", "evidence": "Il évoque un canyon actif et la mouvance du fond, et a requis l’anonymat."}
   ],
   "links": [
     {"source": "RTE", "target": "Interconnexion France–Espagne par le Golfe de Gascogne", "kind": "portage du projet", "evidence": "RTE est le porteur français du projet."},
@@ -113,5 +268,162 @@ const graphData = {
     {"source": "Objectif Aquitaine / La Tribune", "target": "Interconnexion France–Espagne par le Golfe de Gascogne", "kind": "source documentaire", "evidence": "Analyse stratégique des infrastructures."},
     {"source": "L’Info Durable", "target": "Interconnexion France–Espagne par le Golfe de Gascogne", "kind": "source documentaire", "evidence": "Source secondaire."},
     {"source": "La République des Pyrénées", "target": "Interconnexion France–Espagne par le Golfe de Gascogne", "kind": "source documentaire", "evidence": "Analyse des interconnexions européennes."}
+    {
+  "links": [
+    {
+      "source": "Mr Chambily (RTE)",
+      "target": "RTE",
+      "kind": "rattachement",
+      "evidence": "Le post de Stop THT 40 le désigne comme « Mr Chambily (RTE) »."
+    },
+    {
+      "source": "Mme Pajot (RTE)",
+      "target": "RTE",
+      "kind": "rattachement",
+      "evidence": "Le post de Stop THT 40 la désigne comme « Mme Pajot (RTE) »."
+    },
+    {
+      "source": "StopTHT40",
+      "target": "Mr Chambily (RTE)",
+      "kind": "interpellation publique",
+      "evidence": "Le collectif l’invite à sa table ronde du 28 juin."
+    },
+    {
+      "source": "StopTHT40",
+      "target": "Mme Pajot (RTE)",
+      "kind": "interpellation publique",
+      "evidence": "Le collectif l’invite à sa table ronde du 28 juin."
+    },
+    {
+      "source": "Vert",
+      "target": "Interconnexion France–Espagne par le Golfe de Gascogne",
+      "kind": "source documentaire",
+      "evidence": "Enquête du 13 juin 2026 sur le conflit local."
+    },
+    {
+      "source": "Gilles Clavreul",
+      "target": "Préfet des Landes",
+      "kind": "fonction citée",
+      "evidence": "L’article de Vert le désigne comme « le préfet des Landes »."
+    },
+    {
+      "source": "Conseil national de la protection de la nature (CNPN)",
+      "target": "Interconnexion France–Espagne par le Golfe de Gascogne",
+      "kind": "avis défavorable",
+      "evidence": "Avis défavorable du 22 août 2022 cité dans le rapport."
+    },
+    {
+      "source": "Ministère de la transition énergétique",
+      "target": "Interconnexion France–Espagne par le Golfe de Gascogne",
+      "kind": "déclaration d’utilité publique",
+      "evidence": "Le projet est présenté comme déclaré d’utilité publique par ce ministère."
+    },
+    {
+      "source": "Ministère de la transition écologique",
+      "target": "Interconnexion France–Espagne par le Golfe de Gascogne",
+      "kind": "autorisation administrative",
+      "evidence": "RTE indique qu’un avis favorable conforme a été émis et que les autorisations ont été signées."
+    },
+    {
+      "source": "Landes Aquitaine Environnement",
+      "target": "StopTHT40",
+      "kind": "soutien juridique",
+      "evidence": "L’association est décrite comme soutenant juridiquement le collectif."
+    },
+    {
+      "source": "Landes Aquitaine Environnement",
+      "target": "Interconnexion France–Espagne par le Golfe de Gascogne",
+      "kind": "contestation judiciaire",
+      "evidence": "Le rapport cite un recours contre les travaux à son initiative."
+    },
+    {
+      "source": "Landes Aquitaine Environnement",
+      "target": "Conseil d’État",
+      "kind": "recours contentieux",
+      "evidence": "Le recours est indiqué comme porté devant le Conseil d’État."
+    },
+    {
+      "source": "Leyla Labescat",
+      "target": "Landes Aquitaine Environnement",
+      "kind": "représentation",
+      "evidence": "Elle est citée comme secrétaire de l’association."
+    },
+    {
+      "source": "Leyla Labescat",
+      "target": "Champs électromagnétiques",
+      "kind": "inquiétude",
+      "evidence": "Elle questionne l’absence d’étude sur les conséquences potentielles pour la santé."
+    },
+    {
+      "source": "StopTHT40",
+      "target": "François Bayrou",
+      "kind": "demande de moratoire",
+      "evidence": "Une lettre ouverte lui a été adressée en 2024 pour demander un moratoire."
+    },
+    {
+      "source": "StopTHT40",
+      "target": "Monique Barbut",
+      "kind": "interpellation",
+      "evidence": "Les militants comptent sur elle pour accéder à leur demande."
+    },
+    {
+      "source": "Mairie de Capbreton",
+      "target": "Impacts sur les mammifères marins",
+      "kind": "position institutionnelle",
+      "evidence": "Elle indique initialement qu’aucun élément ne permet de relier le décès au chantier."
+    },
+    {
+      "source": "Laboratoire Pélagis",
+      "target": "Impacts sur les mammifères marins",
+      "kind": "expertise scientifique",
+      "evidence": "Pélagis évoque une probable infection et précise que la cause primaire demeure indéterminée."
+    },
+    {
+      "source": "Comité de suivi environnemental (CSE)",
+      "target": "Interconnexion France–Espagne par le Golfe de Gascogne",
+      "kind": "suivi environnemental",
+      "evidence": "Le CSE est dédié aux travaux et aux engagements environnementaux de RTE."
+    },
+    {
+      "source": "Préfet des Landes",
+      "target": "Comité de suivi environnemental (CSE)",
+      "kind": "présidence",
+      "evidence": "La cinquième réunion s’est tenue sous la présidence du préfet des Landes."
+    },
+    {
+      "source": "DREAL",
+      "target": "Interconnexion France–Espagne par le Golfe de Gascogne",
+      "kind": "supervision environnementale",
+      "evidence": "La DREAL est citée parmi les services de l’État assurant la supervision."
+    },
+    {
+      "source": "DDTM",
+      "target": "Interconnexion France–Espagne par le Golfe de Gascogne",
+      "kind": "supervision environnementale",
+      "evidence": "La DDTM est citée parmi les services de l’État assurant la supervision."
+    },
+    {
+      "source": "OFB",
+      "target": "Interconnexion France–Espagne par le Golfe de Gascogne",
+      "kind": "supervision environnementale",
+      "evidence": "L’OFB est cité parmi les services de l’État assurant la supervision."
+    },
+    {
+      "source": "Écologue missionné par RTE",
+      "target": "RTE",
+      "kind": "mission",
+      "evidence": "Le rapport le décrit comme missionné par RTE."
+    },
+    {
+      "source": "Écologue missionné par RTE",
+      "target": "Interconnexion France–Espagne par le Golfe de Gascogne",
+      "kind": "suivi environnemental",
+      "evidence": "Sa surveillance est citée parmi les dispositifs de respect des prescriptions environnementales."
+    },
+    {
+      "source": "Chercheur spécialiste du suivi morphologique du canyon (anonyme)",
+      "target": "Interconnexion France–Espagne par le Golfe de Gascogne",
+      "kind": "expertise technique",
+      "evidence": "Il explique l’impossibilité de faire passer des câbles dans le gouf de Capbreton."}
   ]
 };
