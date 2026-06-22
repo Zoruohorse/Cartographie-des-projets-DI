@@ -49,7 +49,7 @@ const graphData = {
     {"id": "Question du nématode du pin", "label": "Nématode du pin", "group": "Points de vigilance / griefs", "size": 14, "detail": "Soupçons ou interrogations sur un lien indirect avec les travaux.", "position": "Point de vigilance ; preuve non établie.", "evidence": "Le document ne fournit aucune preuve établissant un lien avec RTE."},
     {"id": "Champs électromagnétiques", "label": "Champs électromagnétiques", "group": "Points de vigilance / griefs", "size": 14, "detail": "Risques sanitaires liés aux champs électromagnétiques.", "position": "Point de vigilance.", "evidence": "Évoqués par certaines associations."},
     {"id": "Sécurité maritime", "label": "Sécurité maritime", "group": "Points de vigilance / griefs", "size": 15, "detail": "Sécurité maritime, notamment concernant certains navires employés sur le chantier.", "position": "Grief structurant.", "evidence": "Point notamment porté par la CGT et des organisations syndicales maritimes."},
-    {"id": "Développement énergétique au détriment du vivant", "label": "Développement au détriment du vivant", "group": "Points de vigilance / griefs", "size": 15, "detail": "Critique d’un projet présenté comme symbole d’une logique de développement énergétique au détriment du vivant.", "position": "Grief structurant.", "evidence": "Argument environnemental relayé dans le corpus."}
+    {"id": "Développement énergétique au détriment du vivant", "label": "Développement au détriment du vivant", "group": "Points de vigilance / griefs", "size": 15, "detail": "Critique d’un projet présenté comme symbole d’une logique de développement énergétique au détriment du vivant.", "position": "Grief structurant.", "evidence": "Argument environnemental relayé dans le corpus."},
     {"id": "Mr Chambily (RTE)", "label": "Mr Chambily", "group": "Acteurs seulement cités", "size": 12, "detail": "Personne désignée comme relevant de RTE dans une publication de Stop THT 40.", "position": "Position sur le projet non établie.", "evidence": "Le post du 14 juin cite « Mr Chambily (RTE) » et l’invite à une table ronde."},
     {"id": "Mme Pajot (RTE)", "label": "Mme Pajot", "group": "Acteurs seulement cités", "size": 12, "detail": "Personne désignée comme relevant de RTE dans une publication de Stop THT 40.", "position": "Position sur le projet non établie.", "evidence": "Le post du 14 juin cite « Mme Pajot (RTE) » et l’invite à une table ronde."},
     {"id": "Vert",
@@ -267,7 +267,7 @@ const graphData = {
     {"source": "La Relève et la Peste", "target": "Interconnexion France–Espagne par le Golfe de Gascogne", "kind": "source documentaire", "evidence": "Relais des critiques écologistes."},
     {"source": "Objectif Aquitaine / La Tribune", "target": "Interconnexion France–Espagne par le Golfe de Gascogne", "kind": "source documentaire", "evidence": "Analyse stratégique des infrastructures."},
     {"source": "L’Info Durable", "target": "Interconnexion France–Espagne par le Golfe de Gascogne", "kind": "source documentaire", "evidence": "Source secondaire."},
-    {"source": "La République des Pyrénées", "target": "Interconnexion France–Espagne par le Golfe de Gascogne", "kind": "source documentaire", "evidence": "Analyse des interconnexions européennes."}
+    {"source": "La République des Pyrénées", "target": "Interconnexion France–Espagne par le Golfe de Gascogne", "kind": "source documentaire", "evidence": "Analyse des interconnexions européennes."},
     {
   "links": [
     {
