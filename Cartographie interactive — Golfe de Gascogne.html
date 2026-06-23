@@ -1,40 +1,12 @@
 <!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Cartographie interactive des acteurs — Golfe de Gascogne</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="fr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Cartographie interactive des acteurs — Golfe de Gascogne</title><meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f8fafc;color:#0f172a}header{padding:18px 22px 12px;background:linear-gradient(90deg,#0f172a,#334155);color:#fff}h1{margin:0;font-size:22px}header p{margin:6px 0 0;color:#cbd5e1;font-size:13px}#wrap{display:grid;grid-template-columns:315px 1fr 350px;height:calc(100vh - 74px);min-height:760px}aside,#details{background:white;border-right:1px solid #e2e8f0;padding:16px;overflow:auto}#details{border-left:1px solid #e2e8f0;border-right:0}#chart{position:relative;overflow:hidden}svg{width:100%;height:100%;display:block;background:#f8fafc;cursor:grab}.node circle{stroke:#fff;stroke-width:2px;filter:drop-shadow(0 2px 5px rgba(15,23,42,.18))}.node text{font-size:11px;font-weight:700;paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round;fill:#0f172a;pointer-events:none;text-anchor:middle}.link{stroke:#94a3b8;stroke-opacity:.42;stroke-width:1.2}.dim{opacity:.12}.hidden{display:none}.selected circle{stroke:#0f172a;stroke-width:3.2px}label{display:flex;gap:8px;align-items:center;margin:8px 0;font-size:13px;line-height:1.25}#search{width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:10px} #checks input[type='checkbox']{width:auto;flex:0 0 auto;margin:0}button{border:1px solid #e2e8f0;background:#fff;border-radius:10px;padding:8px 10px;cursor:pointer;font-size:12px}.btnrow{display:flex;gap:8px;margin:12px 0}.dot{width:11px;height:11px;border-radius:50%;display:inline-block}.hint{color:#64748b;font-size:12px;line-height:1.35;padding:10px;border:1px dashed #e2e8f0;border-radius:10px;margin-bottom:14px}.pill{display:inline-block;border-radius:999px;color:white;padding:5px 9px;font-size:12px;font-weight:700}#tooltip{position:absolute;pointer-events:none;background:#0f172a;color:white;padding:7px 9px;border-radius:8px;font-size:12px;opacity:0;transform:translate(-50%,-120%);z-index:5;white-space:nowrap}
 </style>
-
 <script src="data-gascogne.js"></script>
-
-</head>
-<body>
-<header>
-  <h1>Cartographie interactive des acteurs — Interconnexion Golfe de Gascogne</h1>
-  <p>Porteurs industriels, financeurs européens, services de l’État, collectifs citoyens, associations environnementales, syndicats et médias.</p>
-</header>
-<div id="wrap">
-  <aside>
-    <div class="hint">Recherche, filtres, clic sur un nœud. Nœuds déplaçables ; molette = zoom.</div>
-    <input id="search" placeholder="Rechercher un acteur...">
-    <div class="btnrow"><button id="reset">Réinitialiser</button><button id="center">Recentrer</button></div>
-    <strong>Filtres</strong>
-    <div id="checks"></div>
-    <div id="count"></div>
-  </aside>
-  <main id="chart">
-    <div id="tooltip"></div>
-    <svg id="svg" viewBox="0 0 992 818" style="cursor: grab;"></svg>
-  </main>
-  <section id="details">
-    <h2>Interconnexion France–Espagne</h2>
-    <span class="pill" style="background:#111827">Projet central</span>
-    <p>Cliquez sur un acteur pour afficher sa fiche synthétique et ses rattachements.</p>
-  </section>
-</div>
+</head><body>
+<header><h1>Cartographie interactive des acteurs — Golfe de Gascogne</h1><p>Projet d’interconnexion électrique France–Espagne : porteurs, financeurs, acteurs locaux, griefs et médias.</p></header>
+<div id="wrap"><aside><div class="hint">Recherche, filtres, clic sur un nœud. Nœuds déplaçables ; molette = zoom.</div><input id="search" placeholder="Rechercher un acteur..."><div class="btnrow"><button id="reset">Réinitialiser</button><button id="center">Recentrer</button></div><strong>Filtres</strong><div id="checks"></div><div id="count"></div></aside><main id="chart"><div id="tooltip"></div><svg id="svg" viewBox="0 0 992 818" style="cursor: grab;"></svg></main><section id="details"><h2>Interconnexion France–Espagne par le Golfe de Gascogne</h2><span class="pill" style="background:#111827">Projet central</span><p>Projet d’interconnexion électrique France–Espagne par le Golfe de Gascogne.</p></section></div>
 <script>
 // -----> LA LIGNE DE CONNEXION <-----
 const graph = graphData;
@@ -89,7 +61,7 @@ const nodeEls=nodes.map(n=>{
 });
 
 function pos(){
-  let ring={"Projet central":0, "Porteurs du projet":150, "Institutions publiques":210, "Acteurs économiques / industriels":260, "Élus favorables / prudents":310, "Opposants nommés":240, "Collectifs citoyens":280, "Associations environnementales":320, "Syndicats":300, "Points de vigilance / griefs":360, "Médias / sources":420, "Acteurs seulement cités":400}, bg={}; 
+  let ring={"Projet central":0,"Porteurs du projet":150,"Institutions publiques":210,"Acteurs économiques / industriels":260,"Élus favorables / prudents":310,"Opposants nommés":240,"Collectifs citoyens":280,"Associations environnementales":320,"Syndicats":300,"Points de vigilance / griefs":360,"Médias / sources":420,"Acteurs seulement cités":400}, bg={}; 
   nodes.forEach(n=>(bg[n.group]||=[]).push(n)); 
   nodes.forEach(n=>{
     if(n.id===central){n.x=W/2;n.y=H/2;return} 
@@ -175,6 +147,7 @@ document.getElementById('reset').onclick=()=>{
   document.querySelectorAll('#checks input').forEach(cb=>{cb.checked=true;active.add(cb.value)});
   nodeEls.forEach(e=>e.classList.remove('selected','dim','hidden'));
   linkEls.forEach(e=>e.classList.remove('dim','hidden'));
+  details.innerHTML='<h2>Interconnexion France–Espagne par le Golfe de Gascogne</h2><span class="pill" style="background:#111827">Projet central</span><p>Projet d’interconnexion électrique France–Espagne par le Golfe de Gascogne.</p>';
   filter()
 }; 
 
