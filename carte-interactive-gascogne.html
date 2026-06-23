@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<!-- saved from url=(0152)file:///C:/Users/ROMANZ~1/AppData/Local/Temp/MicrosoftEdgeDownloads/60ac937c-4ef3-4a8a-81c0-2188d09f1e60/golfe-de-gascogne-physique-celtic-corrigee.html -->
-<html lang="fr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="fr">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Cartographie interactive des acteurs — Golfe de Gascogne</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
@@ -33,7 +33,6 @@ svg.grabbing{cursor:grabbing}
 .node text{font-size:11px;font-weight:700;paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round;fill:#0f172a;pointer-events:none;text-anchor:middle}
 .node.dim,.link.dim{opacity:.12}
 .selected circle{stroke:#0f172a;stroke-width:3.4px}
-.node.dragging circle{stroke:#0f172a;stroke-width:3.4px}
 .link.highlight{stroke-opacity:.9;stroke-width:2.6}
 #details h2{margin:0 0 8px;font-size:20px;line-height:1.25}
 .pill{display:inline-flex;align-items:center;gap:7px;border-radius:999px;color:#fff;padding:5px 9px;font-size:12px;font-weight:750;margin-bottom:12px}
@@ -45,7 +44,8 @@ svg.grabbing{cursor:grabbing}
 </style>
 
 <!-- Le fichier data-gascogne.js doit être placé dans le même dossier que cette page. -->
-<script src="file:///C:/Users/ROMANZ~1/AppData/Local/Temp/MicrosoftEdgeDownloads/60ac937c-4ef3-4a8a-81c0-2188d09f1e60/data-gascogne.js"></script>
+<script src="data-gascogne.js"></script>
+<!-- Version : physique Celtic stable, clic et déplacement dissociés. -->
 
 </head>
 <body>
@@ -161,14 +161,6 @@ groups.forEach(gr=>{
 
 const nodes=graph.nodes.map(d=>Object.assign({},d,{x:0,y:0,fixed:false}));
 const nodeById=new Map(nodes.map(d=>[d.id,d]));
-
-// Le nœud central est identifié d'abord par son id, puis par sa catégorie.
-// Cela évite qu'une variation de tiret, d'espace ou de libellé dans data-gascogne.js
-// désactive accidentellement sa mécanique spécifique.
-const centralNode=nodes.find(n=>n.id===central)||nodes.find(n=>n.group==="Projet central")||null;
-const isCentral=n=>Boolean(centralNode&&n===centralNode);
-if(!centralNode) console.warn("Nœud central introuvable : vérifiez data-gascogne.js.");
-
 const links=graph.links.map(d=>Object.assign({},d,{source:nodeById.get(d.source),target:nodeById.get(d.target)})).filter(d=>d.source&&d.target);
 
 const invalidLinks=graph.links.filter(l=>!nodeById.has(l.source)||!nodeById.has(l.target));
@@ -207,16 +199,7 @@ const nodeEls=nodes.map(n=>{
   el.appendChild(t);
   nodeG.appendChild(el);
 
-  el.addEventListener("click",ev=>{
-    // Après un glisser-déposer, on annule le clic synthétique du navigateur.
-    // Sans cela, un déplacement déclencherait aussi la sélection de façon parasite.
-    if(el.dataset.justDragged==="1"){
-      ev.preventDefault();
-      ev.stopPropagation();
-      return;
-    }
-    selectNode(n);
-  });
+  el.addEventListener("click",()=>selectNode(n));
   el.addEventListener("mouseenter",ev=>showTip(n,ev));
   el.addEventListener("mousemove",ev=>showTip(n,ev));
   el.addEventListener("mouseleave",()=>tooltip.style.opacity=0);
@@ -264,7 +247,7 @@ function initialPosition(){
   nodes.forEach(n=>(byGroup[n.group]||=[]).push(n));
   nodes.forEach(n=>{
     n.fixed=false;
-    if(isCentral(n)){
+    if(n.id===central){
       n.x=width/2;
       n.y=height/2;
       return;
@@ -286,7 +269,7 @@ function tick(){
       const dx=l.target.x-l.source.x;
       const dy=l.target.y-l.source.y;
       const dist=Math.hypot(dx,dy)||1;
-      const desired=(isCentral(l.source)||isCentral(l.target))?170:120;
+      const desired=(l.source.id===central||l.target.id===central)?170:120;
       const f=(dist-desired)*0.012;
       const fx=dx/dist*f;
       const fy=dy/dist*f;
@@ -309,7 +292,7 @@ function tick(){
     }
 
     nodes.forEach(n=>{
-      if(isCentral(n)&&!n.fixed){
+      if(n.id===central&&!n.fixed){
         n.x+=(width/2-n.x)*0.035;
         n.y+=(height/2-n.y)*0.035;
       }else if(!n.fixed){
@@ -435,9 +418,8 @@ document.getElementById("center").onclick=()=>{
 };
 
 function drag(el,n){
-  // Important : un clic n'est pas un déplacement.
-  // Le nœud n'est fixé qu'après un mouvement réel de plus de 4 px.
-  // La physique Celtic reste ainsi inchangée lors de la simple ouverture d'une fiche.
+  // Un clic ouvre la fiche sans modifier la physique.
+  // Le nœud est figé uniquement après un vrai déplacement (seuil : 4 px).
   let down=false,dragging=false,startX=0,startY=0,ox=0,oy=0;
 
   el.addEventListener("pointerdown",ev=>{
@@ -446,7 +428,6 @@ function drag(el,n){
     dragging=false;
     startX=ev.clientX;
     startY=ev.clientY;
-    el.dataset.justDragged="";
     el.setPointerCapture(ev.pointerId);
     const pt=toSvg(ev);
     ox=n.x-pt.x;
@@ -460,8 +441,7 @@ function drag(el,n){
       const moved=Math.hypot(ev.clientX-startX,ev.clientY-startY);
       if(moved<4)return;
       dragging=true;
-      n.fixed=true; // Le point, y compris le point central, reste où l'utilisateur le dépose.
-      el.classList.add("dragging");
+      n.fixed=true;
     }
 
     const pt=toSvg(ev);
@@ -469,22 +449,14 @@ function drag(el,n){
     n.y=pt.y+oy;
   });
 
-  function finishDrag(ev){
+  function endDrag(ev){
     if(!down)return;
     down=false;
-    el.classList.remove("dragging");
-
-    if(dragging){
-      // Empêche le clic synthétique qui suit parfois pointerup après un déplacement.
-      el.dataset.justDragged="1";
-      window.setTimeout(()=>{el.dataset.justDragged="";},0);
-    }
-
     try{if(el.hasPointerCapture(ev.pointerId))el.releasePointerCapture(ev.pointerId)}catch(e){}
   }
 
-  el.addEventListener("pointerup",finishDrag);
-  el.addEventListener("pointercancel",finishDrag);
+  el.addEventListener("pointerup",endDrag);
+  el.addEventListener("pointercancel",endDrag);
 }
 
 let currentZoom=1,panX=0,panY=0,panning=false,sx=0,sy=0;
