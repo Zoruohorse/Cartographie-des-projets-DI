@@ -53,7 +53,8 @@ const graphData = {
     {"id": "Google News", "label": "Google News", "group": "Médias / sources cités", "size": 15, "detail": "Agrégateur ; reprise d’articles."}, 
     {"id": "RTE France", "label": "RTE France", "group": "Médias / sources cités", "size": 15, "detail": "Source institutionnelle ; présentation du projet."}, 
     {"id": "CNDP source", "label": "CNDP source", "group": "Médias / sources cités", "size": 15, "detail": "Source institutionnelle ; concertation publique."}, 
-    {"id": "Curebot", "label": "Curebot", "group": "Médias / sources cités", "size": 15, "detail": "Agrégateur documentaire ; compilation des sources."}
+    {"id": "Curebot", "label": "Curebot", "group": "Médias / sources cités", "size": 15, "detail": "Agrégateur documentaire ; compilation des sources."}, 
+    {"id": "Parcs éoliens", "label": "Parcs éoliens", "group": "Projet central", "size": 15, "detail": "Nouveaux parcs dont le raccordement justifie le projet THT selon RTE."}
   ], 
   "links": [
     {"source": "Ligne THT Amiens – Petit-Caux", "target": "Forêt d’Eu", "kind": "rôle"}, 
@@ -137,6 +138,10 @@ const graphData = {
     {"source": "Ligne THT Amiens – Petit-Caux", "target": "Google News", "kind": "source"}, 
     {"source": "Ligne THT Amiens – Petit-Caux", "target": "RTE France", "kind": "source"}, 
     {"source": "Ligne THT Amiens – Petit-Caux", "target": "CNDP source", "kind": "source"}, 
-    {"source": "Ligne THT Amiens – Petit-Caux", "target": "Curebot", "kind": "source"}
+    {"source": "Ligne THT Amiens – Petit-Caux", "target": "Curebot", "kind": "source"}, 
+    {"source": "RTE", "target": "Parcs éoliens", "kind": "lien"},
+    {"source": "EDF", "target": "RTE", "kind": "lien"},
+    {"source": "Reynald Massy", "target": "Eiffage", "kind": "lien"},
+    {"source": "Sylvain Finet", "target": "RTE", "kind": "lien"}
   ]
 };
