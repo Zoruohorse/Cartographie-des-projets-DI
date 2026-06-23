@@ -1,233 +1,519 @@
 <!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!-- saved from url=(0140)file:///C:/Users/ROMANZ~1/AppData/Local/Temp/MicrosoftEdgeDownloads/fedd988e-58f4-4bae-9652-a961535a14aa/golfe-de-gascogne-rendu-celtic.html -->
+<html lang="fr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
 <title>Cartographie interactive des acteurs — Golfe de Gascogne</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f8fafc;color:#0f172a}header{padding:18px 22px 12px;background:linear-gradient(90deg,#0f172a,#334155);color:#fff}h1{margin:0;font-size:22px}header p{margin:6px 0 0;color:#cbd5e1;font-size:13px}#wrap{display:grid;grid-template-columns:315px 1fr 350px;height:calc(100vh - 74px);min-height:760px}aside,#details{background:white;border-right:1px solid #e2e8f0;padding:16px;overflow:auto}#details{border-left:1px solid #e2e8f0;border-right:0}#chart{position:relative;overflow:hidden}svg{width:100%;height:100%;display:block;background:#f8fafc;cursor:grab}.node circle{stroke:#fff;stroke-width:2px;filter:drop-shadow(0 2px 5px rgba(15,23,42,.18))}.node text{font-size:11px;font-weight:700;paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round;fill:#0f172a;pointer-events:none;text-anchor:middle}.link{stroke:#94a3b8;stroke-opacity:.42;stroke-width:1.2}.dim{opacity:.12}.hidden{display:none}.selected circle{stroke:#0f172a;stroke-width:3.2px}label{display:flex;gap:8px;align-items:center;margin:8px 0;font-size:13px;line-height:1.25}#search{width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:10px} #checks input[type='checkbox']{width:auto;flex:0 0 auto;margin:0}button{border:1px solid #e2e8f0;background:#fff;border-radius:10px;padding:8px 10px;cursor:pointer;font-size:12px}.btnrow{display:flex;gap:8px;margin:12px 0}.dot{width:11px;height:11px;border-radius:50%;display:inline-block}.hint{color:#64748b;font-size:12px;line-height:1.35;padding:10px;border:1px dashed #e2e8f0;border-radius:10px;margin-bottom:14px}.pill{display:inline-block;border-radius:999px;color:white;padding:5px 9px;font-size:12px;font-weight:700}#tooltip{position:absolute;pointer-events:none;background:#0f172a;color:white;padding:7px 9px;border-radius:8px;font-size:12px;opacity:0;transform:translate(-50%,-120%);z-index:5;white-space:nowrap}
+:root{--bg:#f8fafc;--panel:#fff;--text:#0f172a;--muted:#64748b;--border:#e2e8f0}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
+header{height:92px;padding:18px 26px;color:#fff;background:linear-gradient(135deg,#0f172a,#334155)}
+header h1{margin:0 0 6px;font-size:22px;letter-spacing:-.02em}
+header p{margin:0;color:#cbd5e1;font-size:14px;line-height:1.45;max-width:1200px}
+#wrap{height:calc(100vh - 92px);display:grid;grid-template-columns:300px 1fr 340px;gap:14px;padding:14px}
+aside,#chart,#details{background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:0 10px 28px rgba(15,23,42,.05);overflow:hidden}
+aside,#details{padding:16px;overflow:auto}
+#chart{position:relative}
+.hint{color:var(--muted);font-size:13px;line-height:1.4;padding:10px;border:1px dashed var(--border);border-radius:12px;background:#f8fafc;margin-bottom:14px}
+input[type="text"]{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:12px;font-size:14px;outline:none}
+input[type="text"]:focus{border-color:#94a3b8;box-shadow:0 0 0 3px rgba(148,163,184,.22)}
+.btnrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 14px}
+button{border:1px solid var(--border);background:#fff;border-radius:12px;padding:10px 9px;cursor:pointer;font-size:13px;font-weight:650}
+button:hover{background:#f1f5f9}
+.section-title{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#475569;font-weight:800;margin:8px 0}
+#checks label{display:flex;align-items:center;gap:8px;margin:8px 0;font-size:13px;cursor:pointer}
+.legend-dot{width:11px;height:11px;border-radius:50%;display:inline-block;flex:0 0 auto}
+.count{font-size:13px;color:#475569;border-top:1px solid var(--border);padding-top:12px;margin-top:14px}
+svg{width:100%;height:100%;display:block;cursor:grab;background:radial-gradient(circle at 28% 24%,rgba(37,99,235,.08),transparent 28%),radial-gradient(circle at 76% 68%,rgba(245,158,11,.10),transparent 32%),#f8fafc}
+svg.grabbing{cursor:grabbing}
+.link{stroke:#94a3b8;stroke-opacity:.42;stroke-width:1.2}
+.link.hidden,.node.hidden{display:none}
+.node circle{stroke:#fff;stroke-width:2.2px;filter:drop-shadow(0 2px 6px rgba(15,23,42,.18));cursor:pointer}
+.node text{font-size:11px;font-weight:700;paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round;fill:#0f172a;pointer-events:none;text-anchor:middle}
+.node.dim,.link.dim{opacity:.12}
+.selected circle{stroke:#0f172a;stroke-width:3.4px}
+.link.highlight{stroke-opacity:.9;stroke-width:2.6}
+#details h2{margin:0 0 8px;font-size:20px;line-height:1.25}
+.pill{display:inline-flex;align-items:center;gap:7px;border-radius:999px;color:#fff;padding:5px 9px;font-size:12px;font-weight:750;margin-bottom:12px}
+#details h3{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#475569;margin:14px 0 6px;border-top:1px solid var(--border);padding-top:12px}
+#details p{font-size:14px;line-height:1.45;margin:0;white-space:pre-line}
+.mini{color:var(--muted);font-size:12px;margin-top:14px}
+.tooltip{position:absolute;pointer-events:none;background:#0f172a;color:#fff;padding:8px 10px;border-radius:9px;font-size:12px;opacity:0;transform:translate(-50%,-120%);z-index:5;max-width:280px}
+@media(max-width:1050px){#wrap{grid-template-columns:260px 1fr}#details{display:none}}
 </style>
 
-<!-- APPEL DU FICHIER DE DONNÉES -->
-<script src="data-gascogne.js"></script>
+<!-- Le fichier data-gascogne.js doit être placé dans le même dossier que cette page. -->
+<script src="file:///C:/Users/ROMANZ~1/AppData/Local/Temp/MicrosoftEdgeDownloads/fedd988e-58f4-4bae-9652-a961535a14aa/data-gascogne.js"></script>
 
 </head>
 <body>
 <header>
-  <h1>Cartographie interactive des acteurs — Golfe de Gascogne</h1>
-  <p>Projet d’interconnexion électrique France-Espagne : porteurs, financeurs, acteurs locaux, griefs et médias.</p>
+<h1>Cartographie interactive des acteurs — Golfe de Gascogne</h1>
+<p>Projet d’interconnexion électrique France-Espagne : porteurs, financeurs, acteurs locaux, griefs et médias documentés.</p>
 </header>
+
 <div id="wrap">
-  <aside>
-    <div class="hint">Recherche, filtres, clic sur un nœud. Nœuds déplaçables ; molette = zoom.</div>
-    <input id="search" placeholder="Rechercher un acteur...">
-    <div class="btnrow"><button id="reset">Réinitialiser</button><button id="center">Recentrer</button></div>
-    <strong>Filtres</strong>
-    <div id="checks"></div>
-    <div id="count"></div>
-  </aside>
-  <main id="chart">
-    <div id="tooltip"></div>
-    <svg id="svg" viewBox="0 0 992 818" style="cursor: grab;"></svg>
-  </main>
-  <section id="details">
-    <h2>Interconnexion France–Espagne par le Golfe de Gascogne</h2>
-    <span class="pill" style="background:#111827">Projet central</span>
-    <p>Projet d’interconnexion électrique transfrontalière.</p>
-  </section>
+<aside>
+  <div class="hint">Utilisation : recherche, filtres par famille, clic sur un nœud pour ouvrir sa fiche. Les nœuds sont déplaçables ; molette = zoom.</div>
+  <input id="search" type="text" placeholder="Rechercher un acteur, une position, une preuve…">
+  <div class="btnrow"><button id="reset">Réinitialiser</button><button id="center">Recentrer</button></div>
+  <div class="section-title">Filtres</div>
+  <div id="checks"></div>
+  <div class="count" id="count"></div>
+</aside>
+
+<main id="chart">
+  <div class="tooltip" id="tooltip"></div>
+  <svg id="svg" aria-label="Cartographie interactive des acteurs du Golfe de Gascogne" viewBox="0 0 974 770"></svg>
+</main>
+
+<section id="details">
+  <h2>Interconnexion France–Espagne par le Golfe de Gascogne</h2>
+  <span class="pill" style="background:#111827">Projet central</span>
+  <p>Projet d’interconnexion électrique transfrontalière entre la France et l’Espagne, par le Golfe de Gascogne.</p>
+  <p class="mini">Lecture rapide : plus le nœud est gros, plus l’acteur est structurant dans le corpus.</p>
+</section>
 </div>
+
 <script>
+(function(){
+"use strict";
+
 // -----> LA LIGNE DE CONNEXION <-----
 const graph = graphData;
 
-const colors={"Projet central": "#111827", "Opposants nommés": "#dc2626", "Élus opposés / critiques": "#7c3aed", "Élus favorables / prudents": "#2563eb", "Porteurs du projet": "#1d4ed8", "Institutions publiques": "#475569", "Collectifs citoyens": "#f59e0b", "Associations environnementales": "#16a34a", "Syndicats": "#ea580c", "Acteurs économiques / industriels": "#0f766e", "Médias / sources": "#64748b", "Acteurs seulement cités": "#94a3b8", "Points de vigilance / griefs": "#be123c"}, 
-groups=["Projet central", "Porteurs du projet", "Institutions publiques", "Acteurs économiques / industriels", "Élus favorables / prudents", "Opposants nommés", "Collectifs citoyens", "Associations environnementales", "Syndicats", "Points de vigilance / griefs", "Médias / sources", "Acteurs seulement cités"], 
-central="Interconnexion France–Espagne par le Golfe de Gascogne";
-
-const svg=document.getElementById('svg'); svg.innerHTML=''; 
-const chart=document.getElementById('chart'), details=document.getElementById('details'), tooltip=document.getElementById('tooltip'), checks=document.getElementById('checks'), count=document.getElementById('count'); 
-let W=chart.clientWidth,H=chart.clientHeight; 
-svg.setAttribute('viewBox',[0,0,W,H].join(' ')); 
-const ns='http://www.w3.org/2000/svg', g=document.createElementNS(ns,'g'), lg=document.createElementNS(ns,'g'), ng=document.createElementNS(ns,'g'); 
-svg.appendChild(g); g.appendChild(lg); g.appendChild(ng); 
-const active=new Set(groups);
-groups.forEach(gr=>{
-  let l=document.createElement('label'); 
-  l.innerHTML=`<input type="checkbox" checked value="${gr}"><span class="dot" style="background:${colors[gr]||'#64748b'}"></span><span>${gr}</span>`; 
-  checks.appendChild(l);
-}); 
-checks.onchange=e=>{
-  if(e.target.type==='checkbox'){
-    e.target.checked?active.add(e.target.value):active.delete(e.target.value);
-    filter();
-  }
+const colors={
+"Projet central":"#111827",
+"Opposants nommés":"#dc2626",
+"Élus opposés / critiques":"#7c3aed",
+"Élus favorables / prudents":"#2563eb",
+"Porteurs du projet":"#1d4ed8",
+"Institutions publiques":"#475569",
+"Collectifs citoyens":"#f59e0b",
+"Associations environnementales":"#16a34a",
+"Organisations agricoles":"#65a30d",
+"Syndicats":"#ea580c",
+"Acteurs économiques / industriels":"#0f766e",
+"Experts / chercheurs":"#0891b2",
+"Médias / sources":"#64748b",
+"Acteurs seulement cités":"#94a3b8",
+"Points de vigilance / griefs":"#be123c"
 };
-const nodes=graph.nodes.map(d=>Object.assign({},d)), by=new Map(nodes.map(d=>[d.id,d])); 
-const links=graph.links.map(d=>Object.assign({},d,{source:by.get(d.source),target:by.get(d.target)})).filter(d=>d.source&&d.target);
-const linkEls=links.map(()=>{
-  let x=document.createElementNS(ns,'line'); 
-  x.classList.add('link'); lg.appendChild(x); 
-  return x;
+
+const central="Interconnexion France–Espagne par le Golfe de Gascogne";
+const groupOrder=[
+"Projet central","Porteurs du projet","Acteurs économiques / industriels","Institutions publiques",
+"Élus favorables / prudents","Élus opposés / critiques","Experts / chercheurs","Collectifs citoyens",
+"Points de vigilance / griefs","Médias / sources","Opposants nommés","Associations environnementales",
+"Organisations agricoles","Syndicats","Acteurs seulement cités"
+];
+
+const svg=document.getElementById("svg");
+const chart=document.getElementById("chart");
+const details=document.getElementById("details");
+const tooltip=document.getElementById("tooltip");
+const checks=document.getElementById("checks");
+const countEl=document.getElementById("count");
+const search=document.getElementById("search");
+const ns="http://www.w3.org/2000/svg";
+
+while(svg.firstChild)svg.removeChild(svg.firstChild);
+if(window.__gascogneMapAnimationFrame){
+  cancelAnimationFrame(window.__gascogneMapAnimationFrame);
+  window.__gascogneMapAnimationFrame=null;
+}
+
+let width=chart.clientWidth;
+let height=chart.clientHeight;
+svg.setAttribute("viewBox",[0,0,width,height].join(" "));
+
+const g=document.createElementNS(ns,"g");
+const linkG=document.createElementNS(ns,"g");
+const nodeG=document.createElementNS(ns,"g");
+g.appendChild(linkG);
+g.appendChild(nodeG);
+svg.appendChild(g);
+
+const groups=[...new Set(graph.nodes.map(n=>n.group))].sort((a,b)=>{
+  const ia=groupOrder.indexOf(a),ib=groupOrder.indexOf(b);
+  return (ia<0?999:ia)-(ib<0?999:ib);
 });
+const activeGroups=new Set(groups);
+
+groups.forEach(gr=>{
+  const label=document.createElement("label");
+  const cb=document.createElement("input");
+  cb.type="checkbox";
+  cb.checked=true;
+  cb.value=gr;
+  const dot=document.createElement("span");
+  dot.className="legend-dot";
+  dot.style.background=colors[gr]||"#64748b";
+  const txt=document.createElement("span");
+  txt.textContent=gr;
+  label.appendChild(cb);
+  label.appendChild(dot);
+  label.appendChild(txt);
+  checks.appendChild(label);
+});
+
+const nodes=graph.nodes.map(d=>Object.assign({},d,{x:0,y:0,fixed:false}));
+const nodeById=new Map(nodes.map(d=>[d.id,d]));
+const links=graph.links.map(d=>Object.assign({},d,{source:nodeById.get(d.source),target:nodeById.get(d.target)})).filter(d=>d.source&&d.target);
+
+const invalidLinks=graph.links.filter(l=>!nodeById.has(l.source)||!nodeById.has(l.target));
+if(invalidLinks.length)console.error("Liens invalides",invalidLinks);
+
+const linkEls=links.map(l=>{
+  const line=document.createElementNS(ns,"line");
+  line.classList.add("link");
+  line.dataset.source=l.source.id;
+  line.dataset.target=l.target.id;
+  linkG.appendChild(line);
+  return line;
+});
+
 const nodeEls=nodes.map(n=>{
-  let el=document.createElementNS(ns,'g'); 
-  el.classList.add('node'); el.dataset.id=n.id; el.dataset.group=n.group; 
-  let c=document.createElementNS(ns,'circle'); 
-  c.setAttribute('r',n.size); c.setAttribute('fill',colors[n.group]||'#999'); 
-  let t=document.createElementNS(ns,'text'); 
-  t.setAttribute('dy',n.size+13); 
-  String(n.label||n.id).split('\n').forEach((p,i)=>{
-    let sp=document.createElementNS(ns,'tspan'); 
-    sp.textContent=p; sp.setAttribute('x',0); sp.setAttribute('dy',i?12:0); t.appendChild(sp);
-  }); 
-  el.appendChild(c); el.appendChild(t); ng.appendChild(el); 
-  el.onclick=()=>select(n); 
-  el.onmouseenter=ev=>tip(n,ev); 
-  el.onmousemove=ev=>tip(n,ev); 
-  el.onmouseleave=()=>tooltip.style.opacity=0; 
-  drag(el,n); 
+  const el=document.createElementNS(ns,"g");
+  el.classList.add("node");
+  el.dataset.id=n.id;
+  el.dataset.group=n.group;
+
+  const c=document.createElementNS(ns,"circle");
+  c.setAttribute("r",n.size);
+  c.setAttribute("fill",colors[n.group]||"#64748b");
+
+  const t=document.createElementNS(ns,"text");
+  t.setAttribute("dy",n.size+13);
+  String(n.label||n.id).split("\n").forEach((part,i)=>{
+    const tsp=document.createElementNS(ns,"tspan");
+    tsp.textContent=part;
+    tsp.setAttribute("x",0);
+    tsp.setAttribute("dy",i===0?0:12);
+    t.appendChild(tsp);
+  });
+
+  el.appendChild(c);
+  el.appendChild(t);
+  nodeG.appendChild(el);
+
+  el.addEventListener("click",()=>selectNode(n));
+  el.addEventListener("mouseenter",ev=>showTip(n,ev));
+  el.addEventListener("mousemove",ev=>showTip(n,ev));
+  el.addEventListener("mouseleave",()=>tooltip.style.opacity=0);
+  drag(el,n);
+
   return el;
 });
 
-function pos(){
-  let ring={"Projet central":0, "Porteurs du projet":150, "Institutions publiques":210, "Acteurs économiques / industriels":260, "Élus favorables / prudents":310, "Opposants nommés":240, "Collectifs citoyens":280, "Associations environnementales":320, "Syndicats":300, "Points de vigilance / griefs":360, "Médias / sources":420, "Acteurs seulement cités":400}, bg={}; 
-  nodes.forEach(n=>(bg[n.group]||=[]).push(n)); 
+function initialPosition(){
+  const ring={
+    "Projet central":0,
+    "Porteurs du projet":155,
+    "Acteurs économiques / industriels":245,
+    "Institutions publiques":310,
+    "Élus favorables / prudents":255,
+    "Élus opposés / critiques":275,
+    "Experts / chercheurs":330,
+    "Collectifs citoyens":300,
+    "Points de vigilance / griefs":360,
+    "Médias / sources":430,
+    "Opposants nommés":380,
+    "Associations environnementales":350,
+    "Organisations agricoles":350,
+    "Syndicats":350,
+    "Acteurs seulement cités":430
+  };
+  const baseAngle={
+    "Projet central":0,
+    "Porteurs du projet":-0.25,
+    "Acteurs économiques / industriels":0.55,
+    "Institutions publiques":-1.65,
+    "Élus favorables / prudents":-2.55,
+    "Élus opposés / critiques":2.95,
+    "Experts / chercheurs":2.1,
+    "Collectifs citoyens":2.65,
+    "Points de vigilance / griefs":1.35,
+    "Médias / sources":-3.05,
+    "Opposants nommés":3.1,
+    "Associations environnementales":2.7,
+    "Organisations agricoles":2.9,
+    "Syndicats":3.0,
+    "Acteurs seulement cités":-2.9
+  };
+  const byGroup={};
+  nodes.forEach(n=>(byGroup[n.group]||=[]).push(n));
   nodes.forEach(n=>{
-    if(n.id===central){n.x=W/2;n.y=H/2;return} 
-    let a=bg[n.group], i=a.indexOf(n), base=Object.keys(bg).indexOf(n.group)*.62; 
-    if(n.group==="Porteurs du projet")base=-.1; 
-    if(n.group==="Points de vigilance / griefs")base=2.3; 
-    let ang=base+i*(Math.PI*2/Math.max(a.length,1)), r=ring[n.group]||300; 
-    n.x=W/2+Math.cos(ang)*r; n.y=H/2+Math.sin(ang)*r;
-  })
-} 
-pos();
+    n.fixed=false;
+    if(n.id===central){
+      n.x=width/2;
+      n.y=height/2;
+      return;
+    }
+    const arr=byGroup[n.group];
+    const idx=arr.indexOf(n);
+    const total=arr.length;
+    const spread=Math.PI*2/Math.max(total,1);
+    const angle=(baseAngle[n.group]??0)+idx*spread;
+    const r=Math.min(ring[n.group]||320,Math.max(150,Math.min(width,height)*0.46));
+    n.x=width/2+Math.cos(angle)*r;
+    n.y=height/2+Math.sin(angle)*r;
+  });
+}
 
 function tick(){
   for(let k=0;k<2;k++){
     links.forEach(l=>{
-      let dx=l.target.x-l.source.x,dy=l.target.y-l.source.y,d=Math.hypot(dx,dy)||1,des=(l.source.id===central||l.target.id===central)?170:120,f=(d-des)*.012,fx=dx/d*f,fy=dy/d*f;
+      const dx=l.target.x-l.source.x;
+      const dy=l.target.y-l.source.y;
+      const dist=Math.hypot(dx,dy)||1;
+      const desired=(l.source.id===central||l.target.id===central)?170:120;
+      const f=(dist-desired)*0.012;
+      const fx=dx/dist*f;
+      const fy=dy/dist*f;
       if(!l.source.fixed){l.source.x+=fx;l.source.y+=fy}
       if(!l.target.fixed){l.target.x-=fx;l.target.y-=fy}
-    }); 
-    for(let i=0;i<nodes.length;i++)
+    });
+
+    for(let i=0;i<nodes.length;i++){
       for(let j=i+1;j<nodes.length;j++){
-        let a=nodes[i],b=nodes[j],dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1,min=a.size+b.size+38;
-        if(d<min){
-          let f=(min-d)/d*.028;
+        const a=nodes[i],b=nodes[j];
+        const dx=b.x-a.x,dy=b.y-a.y;
+        const dist=Math.hypot(dx,dy)||1;
+        const min=a.size+b.size+38;
+        if(dist<min){
+          const f=(min-dist)/dist*0.028;
           if(!a.fixed){a.x-=dx*f;a.y-=dy*f}
           if(!b.fixed){b.x+=dx*f;b.y+=dy*f}
         }
-      } 
+      }
+    }
+
     nodes.forEach(n=>{
-      if(n.id!==central&&!n.fixed){n.x+=(W/2-n.x)*.0015;n.y+=(H/2-n.y)*.0015} 
-      n.x=Math.max(40,Math.min(W-40,n.x)); 
-      n.y=Math.max(40,Math.min(H-40,n.y));
-    })
-  } 
-  linkEls.forEach((e,i)=>{
-    let l=links[i]; 
-    e.setAttribute('x1',l.source.x);e.setAttribute('y1',l.source.y);e.setAttribute('x2',l.target.x);e.setAttribute('y2',l.target.y)
-  }); 
-  nodeEls.forEach((e,i)=>e.setAttribute('transform',`translate(${nodes[i].x},${nodes[i].y})`)); 
-  requestAnimationFrame(tick)
-} 
-tick();
+      if(n.id===central&&!n.fixed){
+        n.x+=(width/2-n.x)*0.035;
+        n.y+=(height/2-n.y)*0.035;
+      }else if(!n.fixed){
+        n.x+=(width/2-n.x)*0.0015;
+        n.y+=(height/2-n.y)*0.0015;
+      }
+      n.x=Math.max(40,Math.min(width-40,n.x));
+      n.y=Math.max(40,Math.min(height-40,n.y));
+    });
+  }
 
-function esc(s){return String(s||"").replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))} 
+  linkEls.forEach((el,i)=>{
+    const l=links[i];
+    el.setAttribute("x1",l.source.x);
+    el.setAttribute("y1",l.source.y);
+    el.setAttribute("x2",l.target.x);
+    el.setAttribute("y2",l.target.y);
+  });
 
-function select(n){
-  nodeEls.forEach(e=>e.classList.remove('selected','dim'));
-  linkEls.forEach(e=>e.classList.remove('dim'));
-  let neigh=new Set([n.id]);
-  links.forEach(l=>{if(l.source.id===n.id)neigh.add(l.target.id);if(l.target.id===n.id)neigh.add(l.source.id)});
-  nodeEls.forEach(e=>{if(!neigh.has(e.dataset.id))e.classList.add('dim'); if(e.dataset.id===n.id)e.classList.add('selected')}); 
-  linkEls.forEach((e,i)=>{let l=links[i]; if(l.source.id!==n.id&&l.target.id!==n.id)e.classList.add('dim')}); 
-  
-  let conns = links.filter(l=>l.source.id===n.id||l.target.id===n.id).map(l=>{
-    let other = l.source.id===n.id ? l.target.id : l.source.id;
-    return "• " + esc(other) + " — " + esc(l.kind || "relation");
-  }).join("<br>");
-
-  details.innerHTML=`<h2>${esc(n.id)}</h2><span class="pill" style="background:${colors[n.group]||'#64748b'}">${esc(n.group)}</span>
-  <p><strong>Description :</strong><br>${esc(n.detail)}</p>
-  ${n.position ? `<p style="margin-top:10px;"><strong>Position :</strong><br>${esc(n.position)}</p>` : ''}
-  ${n.evidence ? `<p style="margin-top:10px;"><strong>Preuve :</strong><br>${esc(n.evidence)}</p>` : ''}
-  <p style="margin-top:14px;" class="mini"><strong>Connexions visibles :</strong><br>${conns || 'aucune'}</p>`
+  nodeEls.forEach((el,i)=>{
+    el.setAttribute("transform",`translate(${nodes[i].x},${nodes[i].y})`);
+  });
 }
 
-function tip(n,ev){
-  tooltip.textContent=n.id+' — '+n.group;
-  tooltip.style.opacity=1;
-  let r=chart.getBoundingClientRect();
-  tooltip.style.left=(ev.clientX-r.left)+'px';
-  tooltip.style.top=(ev.clientY-r.top)+'px'
-} 
+function animate(){
+  tick();
+  window.__gascogneMapAnimationFrame=requestAnimationFrame(animate);
+}
 
-function filter(){
-  let q=document.getElementById('search').value.toLowerCase().trim(), v=0; 
-  nodeEls.forEach((e,i)=>{
-    let n=nodes[i],ok=active.has(n.group)&&(!q||(n.id+' '+n.group+' '+(n.detail||'')+' '+(n.position||'')+' '+(n.evidence||'')).toLowerCase().includes(q));
-    e.classList.toggle('hidden',!ok);
-    if(ok)v++
-  }); 
-  linkEls.forEach((e,i)=>{
-    let l=links[i],s=nodeEls[nodes.indexOf(l.source)],t=nodeEls[nodes.indexOf(l.target)];
-    e.classList.toggle('hidden',s.classList.contains('hidden')||t.classList.contains('hidden'))
+function selectNode(n){
+  nodeEls.forEach(el=>el.classList.remove("selected","dim"));
+  linkEls.forEach(el=>el.classList.remove("dim","highlight"));
+
+  const neigh=new Set([n.id]);
+  links.forEach(l=>{
+    if(l.source.id===n.id)neigh.add(l.target.id);
+    if(l.target.id===n.id)neigh.add(l.source.id);
   });
-  count.textContent=v+' nœuds affichés sur '+nodes.length
-} 
 
-document.getElementById('search').oninput=filter; 
-filter();
+  nodeEls.forEach(el=>{
+    if(!neigh.has(el.dataset.id))el.classList.add("dim");
+    if(el.dataset.id===n.id)el.classList.add("selected");
+  });
 
-document.getElementById('reset').onclick=()=>{
-  document.getElementById('search').value='';
-  document.querySelectorAll('#checks input').forEach(cb=>{cb.checked=true;active.add(cb.value)});
-  nodeEls.forEach(e=>e.classList.remove('selected','dim','hidden'));
-  linkEls.forEach(e=>e.classList.remove('dim','hidden'));
-  details.innerHTML=`<h2>Interconnexion France–Espagne par le Golfe de Gascogne</h2><span class="pill" style="background:#111827">Projet central</span><p>Projet d’interconnexion électrique transfrontalière.</p>`;
-  filter()
-}; 
+  linkEls.forEach((el,i)=>{
+    const l=links[i];
+    if(l.source.id===n.id||l.target.id===n.id)el.classList.add("highlight");
+    else el.classList.add("dim");
+  });
 
-document.getElementById('center').onclick=()=>{zoom=1;panX=0;panY=0;upd()};
+  const conns=links
+    .filter(l=>l.source.id===n.id||l.target.id===n.id)
+    .filter(l=>{
+      const other=l.source.id===n.id?l.target:l.source;
+      const otherEl=nodeEls[nodes.indexOf(other)];
+      return otherEl&&!otherEl.classList.contains("hidden");
+    })
+    .map(l=>({other:l.source.id===n.id?l.target.id:l.source.id,kind:l.kind,evidence:l.evidence}));
+
+  details.innerHTML=`
+    <h2>${escapeHtml(n.id)}</h2>
+    <span class="pill" style="background:${colors[n.group]||"#64748b"}">${escapeHtml(n.group)}</span>
+    <h3>Description</h3><p>${escapeHtml(n.detail||"")}</p>
+    <h3>Position</h3><p>${escapeHtml(n.position||"")}</p>
+    <h3>Preuve</h3><p>${escapeHtml(n.evidence||"")}</p>
+    <h3>Connexions visibles</h3>
+    <p>${conns.length?conns.map(c=>escapeHtml(c.other)+" · "+escapeHtml(c.kind)).join(", "):"aucune"}</p>
+  `;
+}
+
+function applyFilters(){
+  const q=search.value.trim().toLowerCase();
+  let visible=0;
+
+  nodeEls.forEach((el,i)=>{
+    const n=nodes[i];
+    const hay=(n.id+" "+n.group+" "+(n.detail||"")+" "+(n.position||"")+" "+(n.evidence||"")).toLowerCase();
+    const ok=activeGroups.has(n.group)&&(!q||hay.includes(q));
+    el.classList.toggle("hidden",!ok);
+    if(ok)visible++;
+  });
+
+  linkEls.forEach((el,i)=>{
+    const l=links[i];
+    const sEl=nodeEls[nodes.indexOf(l.source)];
+    const tEl=nodeEls[nodes.indexOf(l.target)];
+    el.classList.toggle("hidden",sEl.classList.contains("hidden")||tEl.classList.contains("hidden"));
+  });
+
+  countEl.textContent=visible+" nœud"+(visible>1?"s":"")+" affiché"+(visible>1?"s":"")+" sur "+nodes.length;
+}
+
+checks.addEventListener("change",e=>{
+  if(e.target.type==="checkbox"){
+    e.target.checked?activeGroups.add(e.target.value):activeGroups.delete(e.target.value);
+    applyFilters();
+  }
+});
+
+search.addEventListener("input",applyFilters);
+
+document.getElementById("reset").onclick=()=>{
+  search.value="";
+  activeGroups.clear();
+  groups.forEach(g=>activeGroups.add(g));
+  document.querySelectorAll("#checks input").forEach(cb=>cb.checked=true);
+  nodeEls.forEach(el=>el.classList.remove("selected","dim","hidden"));
+  linkEls.forEach(el=>el.classList.remove("dim","hidden","highlight"));
+  details.innerHTML=`<h2>Interconnexion France–Espagne par le Golfe de Gascogne</h2><span class="pill" style="background:#111827">Projet central</span><p>Projet d’interconnexion électrique transfrontalière entre la France et l’Espagne, par le Golfe de Gascogne.</p><p class="mini">Lecture rapide : plus le nœud est gros, plus l’acteur est structurant dans le corpus.</p>`;
+  currentZoom=1;
+  panX=0;
+  panY=0;
+  updateTransform();
+  initialPosition();
+  applyFilters();
+};
+
+document.getElementById("center").onclick=()=>{
+  currentZoom=1;
+  panX=0;
+  panY=0;
+  updateTransform();
+};
 
 function drag(el,n){
   let down=false,ox=0,oy=0;
-  el.addEventListener('pointerdown',ev=>{down=true;n.fixed=true;el.setPointerCapture(ev.pointerId);let p=tosvg(ev);ox=n.x-p.x;oy=n.y-p.y});
-  el.addEventListener('pointermove',ev=>{if(!down)return;let p=tosvg(ev);n.x=p.x+ox;n.y=p.y+oy});
-  el.addEventListener('pointerup',ev=>{down=false;el.releasePointerCapture(ev.pointerId)})
-} 
+  el.addEventListener("pointerdown",ev=>{
+    ev.stopPropagation();
+    down=true;
+    n.fixed=true;
+    el.setPointerCapture(ev.pointerId);
+    const pt=toSvg(ev);
+    ox=n.x-pt.x;
+    oy=n.y-pt.y;
+  });
+  el.addEventListener("pointermove",ev=>{
+    if(!down)return;
+    const pt=toSvg(ev);
+    n.x=pt.x+ox;
+    n.y=pt.y+oy;
+  });
+  el.addEventListener("pointerup",ev=>{
+    down=false;
+    try{el.releasePointerCapture(ev.pointerId)}catch(e){}
+  });
+}
 
-let zoom=1,panX=0,panY=0,pan=false,sx=0,sy=0; 
+let currentZoom=1,panX=0,panY=0,panning=false,sx=0,sy=0;
 
-function upd(){g.setAttribute('transform',`translate(${panX},${panY}) scale(${zoom})`)} 
+function updateTransform(){
+  g.setAttribute("transform",`translate(${panX},${panY}) scale(${currentZoom})`);
+}
 
-function tosvg(ev){
-  let r=svg.getBoundingClientRect();
-  return {x:(ev.clientX-r.left-panX)/zoom,y:(ev.clientY-r.top-panY)/zoom}
-} 
+function toSvg(ev){
+  const rect=svg.getBoundingClientRect();
+  return{x:(ev.clientX-rect.left-panX)/currentZoom,y:(ev.clientY-rect.top-panY)/currentZoom};
+}
 
-svg.addEventListener('wheel',ev=>{
+svg.addEventListener("wheel",ev=>{
   ev.preventDefault();
-  zoom=Math.max(.35,Math.min(2.8,zoom*(ev.deltaY<0?1.08:.92)));
-  upd()
+  const rect=svg.getBoundingClientRect();
+  const mx=ev.clientX-rect.left;
+  const my=ev.clientY-rect.top;
+  const old=currentZoom;
+  const factor=ev.deltaY<0?1.08:0.92;
+  currentZoom=Math.max(.35,Math.min(2.8,currentZoom*factor));
+  panX=mx-(mx-panX)*(currentZoom/old);
+  panY=my-(my-panY)*(currentZoom/old);
+  updateTransform();
 },{passive:false});
 
-svg.addEventListener('pointerdown',ev=>{
-  if(ev.target===svg){pan=true;sx=ev.clientX-panX;sy=ev.clientY-panY;svg.style.cursor='grabbing'}
-});
-svg.addEventListener('pointermove',ev=>{
-  if(pan){panX=ev.clientX-sx;panY=ev.clientY-sy;upd()}
-});
-svg.addEventListener('pointerup',()=>{
-  pan=false;svg.style.cursor='grab'
+svg.addEventListener("pointerdown",ev=>{
+  if(ev.target===svg){
+    panning=true;
+    sx=ev.clientX-panX;
+    sy=ev.clientY-panY;
+    svg.classList.add("grabbing");
+  }
 });
 
-window.addEventListener('resize',()=>{
-  W=chart.clientWidth;H=chart.clientHeight;
-  svg.setAttribute('viewBox',[0,0,W,H].join(' '))
+svg.addEventListener("pointermove",ev=>{
+  if(panning){
+    panX=ev.clientX-sx;
+    panY=ev.clientY-sy;
+    updateTransform();
+  }
 });
+
+svg.addEventListener("pointerup",()=>{
+  panning=false;
+  svg.classList.remove("grabbing");
+});
+
+svg.addEventListener("pointerleave",()=>{
+  panning=false;
+  svg.classList.remove("grabbing");
+});
+
+window.addEventListener("resize",()=>{
+  width=chart.clientWidth;
+  height=chart.clientHeight;
+  svg.setAttribute("viewBox",[0,0,width,height].join(" "));
+});
+
+function showTip(n,ev){
+  tooltip.innerHTML=`<strong>${escapeHtml(n.id)}</strong><br>${escapeHtml(n.group)}`;
+  tooltip.style.opacity=1;
+  const rect=chart.getBoundingClientRect();
+  tooltip.style.left=(ev.clientX-rect.left)+"px";
+  tooltip.style.top=(ev.clientY-rect.top)+"px";
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+}
+
+initialPosition();
+applyFilters();
+updateTransform();
+animate();
+
+})();
 </script>
-</body>
-</html>
+
+</body></html>
